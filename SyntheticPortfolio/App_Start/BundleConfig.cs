@@ -25,6 +25,12 @@ namespace SyntheticPortfolio
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
                       "~/Content/site.css"));
+
+
+            bundles.Add(new ScriptBundle("~/bundles/mybundle").Include(
+                "~/Scripts/MyScripts/MyJquery.js"));
+            bundles.Add(new StyleBundle("~/Content/mycss").Include(
+                "~/Content/mycss.css"));
         }
     }
 }
