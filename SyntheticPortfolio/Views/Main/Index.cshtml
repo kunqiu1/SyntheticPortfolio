@@ -1,7 +1,213 @@
-﻿
+﻿@using SyntheticPortfolio.Models
+@using WVAPIDataModels
+@using System.Globalization;
+
 @{
-    ViewBag.Title = "View";
+    ViewBag.Title = "Portfolio Summary";
 }
+<br />
+@if (!ViewBag.IsConnect)
+{
+    <button id="btnConnection" class="btn btn-agree btn-block">Connect</button>
+}
+else
+{
+    <button class=" btn btn-block btn-action-main">Market Summary</button>
+    <div class=" row">
+        <table class="display table" style="font-size:small; font-weight:600 ;table-layout:fixed">
+            <thead>
+                <tr>
+                    @foreach (MatlabContractModel mktitem in ViewBag.MktSummaryData)
+                    {
+                        <th style="text-align:center">@mktitem.contract.Symbol</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    @foreach (MatlabContractModel mktitem in ViewBag.MktSummaryData)
+                    {
+                        <td align="center">@Math.Round(mktitem.last,2)</td>
+                    }
+                </tr>
+                <tr>
+                    @foreach (MatlabContractModel mktitem in ViewBag.MktSummaryData)
+                    {
+                        if (mktitem.last / mktitem.close < 1)
+                        {
+                            <td align="center" style="color:darkred">@Math.Round((mktitem.last / mktitem.close - 1) * 100, 2)</td>
+                        }
+                        else
+                        {
+                            <td align="center" style="color:lightseagreen">@Math.Round((mktitem.last / mktitem.close - 1) * 100, 2)</td>
 
-<h2>View</h2>
+                        }
+                    }
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <br />
 
+    <button id="btnDisConnection" class="btn btn-disagree  btn-block">Disconnect</button>
+    <br />
+    <div class="row">
+        <div class="col-lg-12">
+            <table id="tblSummary" class="table  table-responsive" style="font-size:small; font-weight:600 ;table-layout:fixed">
+                <thead style="color:#746232;font-weight:100">
+                    <tr>
+                        @foreach (string item in ViewBag.summaryData.Keys)
+                        {
+                            <th style="text-align:center">@item</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        @foreach (string item in ViewBag.summaryData.Keys)
+                        {
+                            <td align="center">@ViewBag.summaryData[item]</td>
+                        }
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="panel-group">
+        <div class="row">
+            @foreach (PerformanceSummary item in ViewBag.portfolioData.Keys)
+            {
+                <br />
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <button type="button" class="btn btn-lg btn-block btn-collapse" data-toggle="collapse" data-target="#@item.PortfolioType">
+                                    <span class="glyphicon glyphicon-fire"></span>
+                                    @item.PortfolioType <span class="badge">@item.NumSecurities </span>  <span class="badge">@(Math.Round(item.MarketValuePct * 100) + "%")</span>
+                                </button>
+                                <table class="table" style="font-size:small">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align:center">Cost Basis</th>
+                                            <th style="text-align:center">Market Value</th>
+                                            <th style="text-align:center">Delta</th>
+                                            <th style="text-align:center">Unrealized P&L</th>
+                                            <th style="text-align:center">Reazlied P&L</th>
+                                            <th style="text-align:center">Daily P&L</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td align="center">@Math.Round(item.Premium / 1000, 2)</td>
+                                            <td align="center">@Math.Round(item.MarketValue / 1000, 2)</td>
+                                            <td align="center">@Math.Round(item.Delta )</td>
+                                            <td align="center">@Math.Round(item.UnrealizedPL / 1000, 2)</td>
+                                            <td align="center">@Math.Round(item.RealizedPL / 1000, 2)</td>
+                                            <td align="center">@Math.Round(item.DailyiPL / 1000, 2)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="panel-body">
+                                <div id="@item.PortfolioType" class="panel-collapse collapse">
+                                    <div style="overflow:auto;">
+                                        @if (item.PortfolioType == "OPT" || item.PortfolioType == "FOP")
+                                        {
+                                            <table class="display" id="tblSecTypeOption">
+                                                <thead>
+                                                    <tr>
+                                                        <th></th>
+                                                        <th>Ticker</th>
+                                                        <th>#</th>
+                                                        <th>Exp</th>
+                                                        <th>CostBasis</th>
+                                                        <th>MktValue</th>
+                                                        <th>Delta</th>
+                                                        <th>Gamma</th>
+                                                        <th>Theta</th>
+                                                        <th>Vega</th>
+                                                        <th>DailyPL</th>
+                                                        <th>UnPL</th>
+                                                        <th>RzPL</th>
+                                                        <th>LastUpdate</th>
+                                                        <th>Exchange</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (IBPortfolioModel pos in ViewBag.portfolioData[item])
+                                                    {
+                                                        <tr>
+                                                            <td></td>
+                                                            <td>@pos.strategyNameOption</td>
+                                                            <td>@pos.Notes</td>
+                                                            <td>@DateTime.ParseExact(pos.contract.LastTradeDateOrContractMonth, "yyyyMMdd", CultureInfo.InvariantCulture).ToString("yyyy/MM/dd")</td>
+                                                            <td>@Math.Round(pos.premium)</td>
+                                                            <td>@Math.Round(pos.marketValue)</td>
+                                                            <td>@Math.Round(pos.Delta)</td>
+                                                            <td>@Math.Round(pos.Gamma)</td>
+                                                            <td>@Math.Round(pos.Theta)</td>
+                                                            <td>@Math.Round(pos.Vega)</td>
+                                                            <td>@Math.Round(pos.DailyPNL)</td>
+                                                            <td>@Math.Round(pos.unrealizedPNL)</td>
+                                                            <td>@Math.Round(pos.realizedPNL)</td>
+                                                            <td>@pos.LastUpdate.ToShortTimeString()</td>
+                                                            <td>@pos.contract.PrimaryExch</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        }
+                                        else
+                                        {
+                                            <table class="display tblSecType">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Ticker</th>
+                                                        <th>Pos</th>
+                                                        <th>AveCost</th>
+                                                        <th>MktPrice</th>
+                                                        <th>CostBasis</th>
+                                                        <th>MktValue</th>
+                                                        <th>Delta</th>
+                                                        <th>UnPL</th>
+                                                        <th>RzPL</th>
+                                                        <th>Strtgy</th>
+                                                        <th>LastUpdate</th>
+                                                        <th>Exchange</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (IBPortfolioModel pos in ViewBag.portfolioData[item])
+                                                    {
+                                                        <tr>
+                                                            <td>@pos.tickerName</td>
+                                                            <td>@pos.position</td>
+                                                            <td>@Math.Round(pos.averageCost, 2)</td>
+                                                            <td>@Math.Round(pos.marketPrice, 2)</td>
+                                                            <td>@Math.Round(pos.premium)</td>
+                                                            <td>@Math.Round(pos.marketValue)</td>
+                                                            <td>@Math.Round(pos.Delta)</td>
+                                                            <td>@Math.Round(pos.unrealizedPNL)</td>
+                                                            <td>@Math.Round(pos.realizedPNL)</td>
+                                                            <td>@pos.strategyName</td>
+                                                            <td>@pos.LastUpdate.ToShortTimeString()</td>
+                                                            <td>@pos.contract.PrimaryExch</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        }
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}

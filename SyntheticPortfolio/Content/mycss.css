@@ -1,2 +1,231 @@
-﻿body {
+﻿.panel-default > .panel-heading, .modal-header {
+    background-color: white;
+    color: black;
+    font-size: 10px;
+    font-weight: 500;
+    font-family: 'Segoe UI';
 }
+
+.panel-default {
+    border-style:groove;
+    border-width:thick;
+}
+
+a {
+    color: black;
+}
+
+.panel-heading {
+    height: 4%;
+}
+/* BUTTON*/
+.btn-collapse {
+    font-family: 'Segoe UI Symbol';
+    background-color: transparent;
+    color: black;
+    font-weight: 400;
+    font-size: 15px;
+}
+
+    .btn-collapse:active, .btn-collapse:hover, .btn-collapse:focus, .btn-collapse:active:focus {
+        outline: none;
+        font-weight: 800;
+    }
+
+.btn-collapse2 {
+    background-color: #2e506d;
+    color: white;
+    font-family: 'Segoe UI Symbol';
+    font-size: 16px;
+    font-weight: 500;
+    margin: 8px;
+    text-align: center;
+}
+
+    .btn-collapse2:active, .btn-collapse2:hover, .btn-collapse2:focus, .btn-collapse2:active:focus {
+        outline: none;
+        font-weight: 800;
+    }
+
+.btn-action-main {
+    background-color: #0b304a;
+    color: white;
+    margin: 5px;
+}
+
+    .btn-action-main:hover, .btn-action-main:active, .btn-action-main:focus {
+        color: white;
+    }
+
+.btn-agree {
+    background-color: #006d3a;
+    color: white;
+    margin: 5px;
+}
+
+.btn:hover, .btn:active, .btn:focus {
+    color: #cecece;
+}
+
+.btn-in-grid-action {
+    display: inline-block;
+    height: 100%;
+    background-color: #0b304a;
+    color: white;
+    margin-right: 2px;
+}
+
+    .btn-in-grid-action:hover, .btn-action-main:active, .btn-action-main:focus {
+        color: #dcdcdc;
+    }
+
+.btn-in-grid-disagree {
+    background-color: #490715;
+    color: white;
+    display: inline-block;
+    height: 100%;
+    margin-right: 2px;
+}
+
+.btn-in-grid-agree {
+    background-color: #006d3a;
+    color: white;
+    display: inline-block;
+    height: 100%;
+    margin-right: 2px;
+}
+
+.btn-save {
+    background-color: #0b304a;
+    color: white;
+    margin: 5px;
+}
+
+.btn-disagree {
+    background-color: #490715;
+    color: white;
+    margin: 5px;
+}
+
+.btn-invalid {
+    background-color: #3b4955;
+    color: white;
+    margin: 5px;
+}
+
+.btn-important {
+    background-color: #1e4c55;
+    color: white;
+    margin: 5px;
+}
+
+.btn-important2 {
+    background-color: #201840;
+    color: white;
+    margin: 5px;
+}
+
+.btn-warn {
+    background-color: #c24516;
+    color: white;
+    margin: 5px;
+}
+
+/* BUTTON*/
+
+.table-hover > tbody > tr:hover > td, .table-hover > tbody > tr:hover > th {
+    background-color: #cecece;
+    color: #01090a;
+}
+
+table.display tbody tr:hover td {
+    background-color: #cecece !important;
+    color: #01090a;
+}
+
+table.display {
+    font-weight: 400;
+    width: 100%;
+    font-family: 'Segoe UI';
+    font-size:12px;
+}
+
+table.display {
+    font-size: 13px;
+}
+
+table[id^="tblSec"] {
+    cursor: default;
+    width: 100%;
+    font-family: 'Segoe UI';
+    font-weight: 400;
+    font-size: 12px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.thead-hide {
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+}
+
+
+
+.Div_Out_SecDetails {
+    display: block;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+
+#comment {
+    height: 30vh;
+    /*padding-left: 10px;*/
+    min-width: 90%;
+    max-width: 99%;
+}
+
+.navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
+    color: #2e506d; /*Sets the text hover color on navbar*/
+}
+
+.navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active >
+a:hover, .navbar-default .navbar-nav > .active > a:focus {
+    color: white; /*BACKGROUND color for active*/
+    background-color: black;
+}
+
+.navbar-default .navbar-nav > li > a {
+    color: white; /*Change active text color here*/
+    font-size: medium
+}
+
+.navbar-default {
+    background-color: #0b304a;
+    border-color: #0b304a;
+}
+
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.panel-main-page {
+    height: 30vh;
+}
+
+/*.container {
+    width: 99%;
+}*/
+td.details-control {
+    background: url('../Content/Icons/plus.png') no-repeat center center;
+    cursor: pointer;
+}
+
+tr.shown td.details-control {
+    background: url('../Content/Icons/minus.png') no-repeat center center;
+}
+

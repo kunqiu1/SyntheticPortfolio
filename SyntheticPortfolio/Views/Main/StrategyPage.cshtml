@@ -1,0 +1,154 @@
+﻿@using SyntheticPortfolio.Models
+@using WVAPIDataModels
+@{
+    ViewBag.Title = "Portfolio Summary";
+}
+<br />
+@if (ViewBag.IsConnect)
+{
+    <div class="row">
+        <div class="col-lg-11">
+
+            <table id="tblSummary" class="table  table-responsive" style="font-size:small; font-weight:600 ;table-layout:fixed">
+                <thead style="color:#746232;font-weight:100">
+                    <tr>
+                        @foreach (string item in ViewBag.summaryData.Keys)
+                        {
+                            <th style="text-align:center">@item</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        @foreach (string item in ViewBag.summaryData.Keys)
+                        {
+                            <td align="center">@ViewBag.summaryData[item]</td>
+                        }
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="panel-group">
+        <div class="row">
+            @foreach (PerformanceSummary item in ViewBag.portfolioData.Keys)
+            {
+                <br />
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <button type="button" class="btn btn-lg btn-block btn-collapse" data-toggle="collapse" data-target="#@item.PortfolioType">
+                                    <span class="glyphicon glyphicon-fire"></span>
+                                    @item.PortfolioType <span class="badge">@item.NumSecurities </span>  <span class="badge">@(Math.Round(item.MarketValuePct * 100) + "%")</span>
+                                </button>
+                                <table class="table" style="font-size:small">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align:center">Cost Basis</th>
+                                            <th style="text-align:center">Market Value</th>
+                                            <th style="text-align:center">Delta</th>
+                                            <th style="text-align:center">Unrealized P&L</th>
+                                            <th style="text-align:center">Reazlied P&L</th>
+                                            <th style="text-align:center">Daily P&L</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td align="center">@Math.Round(item.Premium / 1000, 2)</td>
+                                            <td align="center">@Math.Round(item.MarketValue / 1000, 2)</td>
+                                            <td align="center">@Math.Round(item.Delta)</td>
+                                            <td align="center">@Math.Round(item.UnrealizedPL / 1000, 2)</td>
+                                            <td align="center">@Math.Round(item.RealizedPL / 1000, 2)</td>
+                                            <td align="center">@Math.Round(item.DailyiPL / 1000, 2)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="panel-body">
+                                <div id="@item.PortfolioType" class="panel-collapse collapse">
+                                    <div style="overflow:auto;">
+                                        <table class="display tblStrategy">
+                                            <thead>
+                                                <tr>
+                                                    <th>Ticker</th>
+                                                    <th>Type</th>
+                                                    <th>Pos</th>
+                                                    <th>AveCost</th>
+                                                    <th>MktPrice</th>
+                                                    <th>CostBasis</th>
+                                                    <th>MktValue</th>
+                                                    <th>Delta</th>
+                                                    <th>UnPL</th>
+                                                    <th>RzPL</th>
+                                                    <th>LastUpdate</th>
+                                                    <th>ComboName</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (IBPortfolioModel pos in ViewBag.portfolioData[item])
+                                                {
+                                                    <tr>
+                                                        <td>@pos.tickerName</td>
+                                                        <td>@pos.secType</td>
+                                                        <td>@pos.position</td>
+                                                        <td>@Math.Round(pos.averageCost, 2)</td>
+                                                        <td>@Math.Round(pos.marketPrice, 2)</td>
+                                                        <td>@Math.Round(pos.premium)</td>
+                                                        <td>@Math.Round(pos.marketValue)</td>
+                                                        <td>@Math.Round(pos.Delta)</td>
+                                                        <td>@Math.Round(pos.unrealizedPNL)</td>
+                                                        <td>@Math.Round(pos.realizedPNL)</td>
+                                                        <td>@pos.LastUpdate.ToShortTimeString()</td>
+                                                        <td>@pos.strategyNameOption</td>
+                                                        <td>
+                                                            <button class="btn btn-in-grid-agree btnEditSecurity"
+                                                                    data-target="#modalEditSecurity" data-toggle="modal"
+                                                                    data-position="@Newtonsoft.Json.JsonConvert.SerializeObject(@pos)">
+                                                                Edit
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<div class="modal" id="modalEditSecurity" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 id="modalheader" style="text-align:center;color:black"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-3">
+                        Strategy
+                    </div>
+                    <div class="col-lg-3">
+                        <div>
+                            <select id="SelectStrategy"></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-disagree" data-dismiss="modal">Close</button>
+                <button type="button" id="btnSaveEditModal" class="btn btn-action-main">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
