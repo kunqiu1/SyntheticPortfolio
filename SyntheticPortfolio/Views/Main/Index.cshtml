@@ -43,11 +43,9 @@ else
 
                         }
                     }
-                </tr>
             </tbody>
         </table>
     </div>
-    <br />
 
     <button id="btnDisConnection" class="btn btn-disagree  btn-block">Disconnect</button>
     <br />
@@ -115,12 +113,13 @@ else
                                     <div style="overflow:auto;">
                                         @if (item.PortfolioType == "OPT" || item.PortfolioType == "FOP")
                                         {
-                                            <table class="display" id="tblSecTypeOption">
+                                            <table class="display table-hover table table-bordered tblMainFormat" id="tblSecTypeOption">
                                                 <thead>
                                                     <tr>
                                                         <th></th>
                                                         <th>Ticker</th>
-                                                        <th>#</th>
+                                                        <th>Index</th>
+                                                        <th>S0</th>
                                                         <th>Exp</th>
                                                         <th>CostBasis</th>
                                                         <th>MktValue</th>
@@ -128,40 +127,38 @@ else
                                                         <th>Gamma</th>
                                                         <th>Theta</th>
                                                         <th>Vega</th>
-                                                        <th>DailyPL</th>
                                                         <th>UnPL</th>
-                                                        <th>RzPL</th>
-                                                        <th>LastUpdate</th>
-                                                        <th>Exchange</th>
+                                                        <th>DailyPL</th>
+ 
+
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     @foreach (IBPortfolioModel pos in ViewBag.portfolioData[item])
                                                     {
-                                                        <tr>
-                                                            <td></td>
-                                                            <td>@pos.strategyNameOption</td>
-                                                            <td>@pos.Notes</td>
-                                                            <td>@DateTime.ParseExact(pos.contract.LastTradeDateOrContractMonth, "yyyyMMdd", CultureInfo.InvariantCulture).ToString("yyyy/MM/dd")</td>
-                                                            <td>@Math.Round(pos.premium)</td>
-                                                            <td>@Math.Round(pos.marketValue)</td>
-                                                            <td>@Math.Round(pos.Delta)</td>
-                                                            <td>@Math.Round(pos.Gamma)</td>
-                                                            <td>@Math.Round(pos.Theta)</td>
-                                                            <td>@Math.Round(pos.Vega)</td>
-                                                            <td>@Math.Round(pos.DailyPNL)</td>
-                                                            <td>@Math.Round(pos.unrealizedPNL)</td>
-                                                            <td>@Math.Round(pos.realizedPNL)</td>
-                                                            <td>@pos.LastUpdate.ToShortTimeString()</td>
-                                                            <td>@pos.contract.PrimaryExch</td>
-                                                        </tr>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td>@pos.strategyNameOption</td>
+                                                        <td>@pos.contract.Symbol</td>
+                                                        <td>@pos.Underlying</td>
+                                                        <td>@DateTime.ParseExact(pos.contract.LastTradeDateOrContractMonth, "yyyyMMdd", CultureInfo.InvariantCulture).ToString("yyyy/MM/dd")</td>
+                                                        <td>@Math.Round(pos.premium)</td>
+                                                        <td>@Math.Round(pos.marketValue)</td>
+                                                        <td>@Math.Round(pos.Delta)</td>
+                                                        <td>@Math.Round(pos.Gamma)</td>
+                                                        <td>@Math.Round(pos.Theta)</td>
+                                                        <td>@Math.Round(pos.Vega)</td>
+                                                        <td>@Math.Round(pos.unrealizedPNL)</td>
+                                                        <td>@Math.Round(pos.DailyPNL)</td>
+           
+                                                    </tr>
                                                     }
                                                 </tbody>
                                             </table>
                                         }
                                         else
                                         {
-                                            <table class="display tblSecType">
+                                            <table class="display table-hover table table-bordered tblSecType tblMainFormat">
                                                 <thead>
                                                     <tr>
                                                         <th>Ticker</th>
@@ -175,26 +172,28 @@ else
                                                         <th>RzPL</th>
                                                         <th>Strtgy</th>
                                                         <th>LastUpdate</th>
-                                                        <th>Exchange</th>
+                                                        <th></th>
+                                                        <th></th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     @foreach (IBPortfolioModel pos in ViewBag.portfolioData[item])
                                                     {
-                                                        <tr>
-                                                            <td>@pos.tickerName</td>
-                                                            <td>@pos.position</td>
-                                                            <td>@Math.Round(pos.averageCost, 2)</td>
-                                                            <td>@Math.Round(pos.marketPrice, 2)</td>
-                                                            <td>@Math.Round(pos.premium)</td>
-                                                            <td>@Math.Round(pos.marketValue)</td>
-                                                            <td>@Math.Round(pos.Delta)</td>
-                                                            <td>@Math.Round(pos.unrealizedPNL)</td>
-                                                            <td>@Math.Round(pos.realizedPNL)</td>
-                                                            <td>@pos.strategyName</td>
-                                                            <td>@pos.LastUpdate.ToShortTimeString()</td>
-                                                            <td>@pos.contract.PrimaryExch</td>
-                                                        </tr>
+                                                    <tr>
+                                                        <td>@pos.tickerName</td>
+                                                        <td>@pos.position</td>
+                                                        <td>@Math.Round(pos.averageCost, 2)</td>
+                                                        <td>@Math.Round(pos.marketPrice, 2)</td>
+                                                        <td>@Math.Round(pos.premium)</td>
+                                                        <td>@Math.Round(pos.marketValue)</td>
+                                                        <td>@Math.Round(pos.Delta)</td>
+                                                        <td>@Math.Round(pos.unrealizedPNL)</td>
+                                                        <td>@Math.Round(pos.realizedPNL)</td>
+                                                        <td>@pos.strategyName</td>
+                                                        <td>@pos.LastUpdate.ToShortTimeString()</td>
+                                                        <td>@pos.exchange</td>
+                                                        <td>@pos.contractID</td>
+                                                    </tr>
                                                     }
                                                 </tbody>
                                             </table>

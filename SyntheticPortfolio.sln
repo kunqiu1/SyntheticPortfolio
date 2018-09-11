@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.28010.2003
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SyntheticPortfolio", "SyntheticPortfolio\SyntheticPortfolio.csproj", "{E76F3ADA-3CED-4CCD-B193-971E5ACA7211}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WVAPIDataModels", "..\..\..\KUN_DEV\WebAPI\HellowWeb2\WVAPI2\WVAPIDataModels\WVAPIDataModels.csproj", "{5C60A4DC-0822-4C40-9689-E6EEEFEA4A9F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WVAPIDataModels", "..\WebAPI\HellowWeb2\WVAPI2\WVAPIDataModels\WVAPIDataModels.csproj", "{5C60A4DC-0822-4C40-9689-E6EEEFEA4A9F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

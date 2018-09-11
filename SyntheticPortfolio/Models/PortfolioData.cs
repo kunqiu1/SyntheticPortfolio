@@ -119,82 +119,57 @@ namespace SyntheticPortfolio.Models
                 MDTickers.Add(new MatlabContractModel(contract, i));
             }
         }
+        private static double ProcessMKTData(MktData item, string ticktype, double value)
+        {
+            if (item.mktdata.Keys.Contains(ticktype))
+            {
+                if (item.mktdata[ticktype] != double.MaxValue)
+                {
+                    return item.mktdata[ticktype];
+                }
+            }
+            return value;
+        }
         internal static void RefreshMDTickers(IEnumerable<MktData> MKTData)
         {
             foreach (var item in MKTData)
             {
-                var mdticker = MDTickers.Where(x => x.contract.ConId == item.ConId).First();
+                var mdticker = MDTickers.Where(x => x.contract.ConId == item.ConId).FirstOrDefault();
                 if (mdticker != null)
                 {
-                    if (mdticker.contract.ConId== 43652089)
-                    {
-
-                    }
                     double multiplier = 1;
                     if (mdticker.contract.Multiplier != null)
                     {
                         multiplier = Convert.ToDouble(mdticker.contract.Multiplier);
                     }
-                    if (item.mktdata.Keys.Contains("lastPrice"))
-                    {
-                        mdticker.last = item.mktdata["lastPrice"];
-                        //port.marketValue = mdticker.last*port.position* multiplier;
-                    }
-                    if (item.mktdata.Keys.Contains("open"))
-                    {
-                        mdticker.open = item.mktdata["open"];
-                    }
-                    if (item.mktdata.Keys.Contains("high"))
-                    {
-                        mdticker.high = item.mktdata["high"];
-                    }
-                    if (item.mktdata.Keys.Contains("low"))
-                    {
-                        mdticker.low = item.mktdata["low"];
-                    }
-                    if (item.mktdata.Keys.Contains("close"))
-                    {
-                        mdticker.close = item.mktdata["close"];
-                    }
-                    if (item.mktdata.Keys.Contains("delta"))
-                    {
-                        mdticker.delta = item.mktdata["delta"];
-                    }
-                    if (item.mktdata.Keys.Contains("gamma"))
-                    {
-                        mdticker.gamma = item.mktdata["gamma"];
-                    }
-                    if (item.mktdata.Keys.Contains("theta"))
-                    {
-                        mdticker.theta = item.mktdata["theta"];
-                    }
-                    if (item.mktdata.Keys.Contains("vega"))
-                    {
-                        mdticker.vega = item.mktdata["vega"];
-                    }
-                    if (item.mktdata.Keys.Contains("optPrice"))
-                    {
-                        mdticker.last = item.mktdata["optPrice"];
-                    }
-                    if (item.mktdata.Keys.Contains("undPrice"))
-                    {
-                        mdticker.lastunderlying = item.mktdata["undPrice"];
-                    }
+                    mdticker.last = ProcessMKTData(item, "lastPrice", mdticker.last);
+                    mdticker.open = ProcessMKTData(item, "open", mdticker.open);
+                    mdticker.high = ProcessMKTData(item, "high", mdticker.high);
+                    mdticker.low = ProcessMKTData(item, "low", mdticker.low);
+                    mdticker.close = ProcessMKTData(item, "close", mdticker.close);
+                    mdticker.delta = ProcessMKTData(item, "delta", mdticker.delta);
+                    mdticker.gamma = ProcessMKTData(item, "gamma", mdticker.gamma);
+                    mdticker.theta = ProcessMKTData(item, "theta", mdticker.theta);
+                    mdticker.vega = ProcessMKTData(item, "vega", mdticker.vega);
+                    mdticker.last = ProcessMKTData(item, "optPrice", mdticker.last);
+                    mdticker.delta = ProcessMKTData(item, "delta", mdticker.delta);
+                    mdticker.iv = ProcessMKTData(item, "iv", mdticker.iv);
+
                     var port = portfolio.Where(x => x.contractID == item.ConId).FirstOrDefault();
                     if (port != null)
                     {
                         port.marketPrice = mdticker.last;
                         port.Underlying = mdticker.lastunderlying;
-                        port.Delta = mdticker.delta * port.position * multiplier*mdticker.lastunderlying*0.01;
+                        port.Delta = mdticker.delta * port.position * multiplier * mdticker.lastunderlying * 0.01;
                         port.Gamma = mdticker.gamma * port.position * multiplier * mdticker.lastunderlying * 0.01;
-                        port.Theta = mdticker.theta * port.position * multiplier * mdticker.lastunderlying * 0.01;
-                        port.Vega = mdticker.vega * port.position * multiplier * mdticker.lastunderlying * 0.01;
+                        port.Theta = mdticker.theta * port.position * multiplier;
+                        port.Vega = mdticker.vega * port.position * multiplier;
                     }
                     var portOption = MDTickers.Where(x => (x.contract.SecType == "OPT" || x.contract.SecType == "FOP")
                     && x.contract.Symbol == mdticker.contract.LocalSymbol);
                     foreach (var option in portOption)
                     {
-                        option.lastunderlying = mdticker.last!=0?mdticker.last:mdticker.close;
+                        option.lastunderlying = mdticker.last != 0 ? mdticker.last : mdticker.close;
                     }
                 }
             }
@@ -249,7 +224,7 @@ namespace SyntheticPortfolio.Models
                 var summary = getPerformanceSummary(port);
                 summary.PortfolioType = item;
 
-                if (item == "OPT" || item=="FOP")
+                if (item == "OPT" || item == "FOP")
                 {
                     summary.Gamma = port.Select(x => x.Gamma).Sum();
                     summary.Theta = port.Select(x => x.Theta).Sum();
@@ -265,6 +240,8 @@ namespace SyntheticPortfolio.Models
                         posOption.contract = new IBApi.Contract();
                         posOption.contract.LastTradeDateOrContractMonth = portOptiontemp.Select(x => x.contract.LastTradeDateOrContractMonth).First();
                         posOption.contract.PrimaryExch = portOptiontemp.Select(x => x.contract.PrimaryExch).First();
+                        posOption.contract.Symbol = portOptiontemp.Select(x => x.contract.Symbol).First();
+                        posOption.Underlying = portOptiontemp.Select(x => x.Underlying).First();
                         posOption.marketValue = portOptiontemp.Select(x => x.marketValue).Sum();
                         posOption.averageCost = portOptiontemp.Select(x => x.averageCost).Sum();
                         posOption.premium = portOptiontemp.Select(x => x.premium).Sum();

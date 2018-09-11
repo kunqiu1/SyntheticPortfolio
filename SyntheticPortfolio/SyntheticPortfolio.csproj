@@ -223,7 +223,7 @@
     <Content Include="Scripts\jquery-3.3.1.min.map" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\KUN_DEV\WebAPI\HellowWeb2\WVAPI2\WVAPIDataModels\WVAPIDataModels.csproj">
+    <ProjectReference Include="..\..\WebAPI\HellowWeb2\WVAPI2\WVAPIDataModels\WVAPIDataModels.csproj">
       <Project>{5c60a4dc-0822-4c40-9689-e6eeefea4a9f}</Project>
       <Name>WVAPIDataModels</Name>
     </ProjectReference>

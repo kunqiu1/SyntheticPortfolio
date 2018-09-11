@@ -3,7 +3,7 @@
     var CurrentSecurity;
     $.ajax({
         async: false,
-        url: "matrix/Main/GetAvailableStrategies",
+        url: "/Main/GetAvailableStrategies",
         type: 'GET',
         success: function (data) {
             AllStrategies = data;
@@ -46,7 +46,7 @@
     $('.tblSecType').DataTable();
     function format(d) {
         var col = ['Ticker', 'Type', 'Pos', 'Strike', 'Moneyness', 'Premium', 'MV', 'Delta', 'Gamma', 'Theta', 'Vega', 'DailyPL', 'UnPL', 'RzPL'];
-        var result = '<table class="display table table-condensed" style="table-layout:fixed"><thead><tr>';
+        var result = '<table class="table table-condensed table-bordered " style="table-layout:fixed;font-size:11px;font-weight:300;"><thead><tr>';
         $.each(col, function (i, item) {
             result += '<th>' + item + '</th>';
         });
@@ -77,6 +77,9 @@
                         + '<td>' + item.realizedPNL + '</td>'
                         + '</tr>';
                 })
+            },
+            error: function (a, b, c) {
+
             }
         })
         result += '</tbody></table>';
@@ -92,20 +95,8 @@
                     "data": null,
                     "defaultContent": ''
                 },
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
+                null, null, null, null, null, null, null, null, null, null,
+                null, null
             ]
         });
     $('#tblSecTypeOption tbody').on('click', 'td.details-control', function () {

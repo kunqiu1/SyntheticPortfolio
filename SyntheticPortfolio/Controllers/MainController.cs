@@ -26,6 +26,8 @@ namespace SyntheticPortfolio.Controllers
         private string ApiUrl;
         private int IBPort;
         private int MDPort;
+        private int IBId;
+        private int MDId;
         private List<int> MktSummaryTickers;
         private bool m_isconnect;
         public MainController()
@@ -33,6 +35,8 @@ namespace SyntheticPortfolio.Controllers
             ApiUrl = ConfigurationManager.AppSettings["APIURL"].ToString();
             IBPort = Convert.ToInt32(ConfigurationManager.AppSettings["IBPort"]);
             MDPort = Convert.ToInt32(ConfigurationManager.AppSettings["MDPort"]);
+            IBId = Convert.ToInt32(ConfigurationManager.AppSettings["IBId"]);
+            MDId = Convert.ToInt32(ConfigurationManager.AppSettings["MDId"]);
             MktSummaryTickers = new List<int>();
             List<string> temp = ConfigurationManager.AppSettings["TickersFUT"].ToString().Split(';').ToList();
             int i = 1;
@@ -147,8 +151,8 @@ namespace SyntheticPortfolio.Controllers
         [HttpGet]
         public ActionResult LoginAccount()
         {
-            DownloadData($"IB/login/{IBPort}/1");
-            DownloadData($"MD/login/{MDPort}/2");
+            DownloadData($"IB/login/{IBPort}/{IBId}");
+            DownloadData($"MD/login/{MDPort}/{MDId}");
             return Json("Request sent", JsonRequestBehavior.AllowGet);
         }
 

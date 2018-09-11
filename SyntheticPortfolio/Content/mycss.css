@@ -133,14 +133,11 @@ a {
 
 /* BUTTON*/
 
-.table-hover > tbody > tr:hover > td, .table-hover > tbody > tr:hover > th {
-    background-color: #cecece;
-    color: #01090a;
-}
 
 table.display tbody tr:hover td {
-    background-color: #cecece !important;
-    color: #01090a;
+    /*background-color: #2e506d !important;*/
+    color:#0b304a;
+    font-weight:600;
 }
 
 table.display {
@@ -155,6 +152,15 @@ table.display {
 }
 
 table[id^="tblSec"] {
+    /*cursor: default;
+    width: 100%;
+    font-family: 'Segoe UI';
+    font-weight: 300;
+    font-size: 10px;
+    margin-top: 0px;
+    margin-bottom: 0px;*/
+}
+table.tblMainFormat {
     cursor: default;
     width: 100%;
     font-family: 'Segoe UI';
