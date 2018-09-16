@@ -1,6 +1,7 @@
 ﻿using SyntheticPortfolio.Models;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Security.Principal;
 using System.Web;
@@ -11,6 +12,11 @@ namespace SyntheticPortfolio.Controllers
 {
     public class HomeController : Controller
     {
+        public HomeController()
+        {
+            string ApiUrl = ConfigurationManager.AppSettings["APIURL"].ToString();
+            DataServiceAPI.Initialize(ApiUrl);
+        }
         [HttpGet]
         public ActionResult Login(string returnURL)
         {
@@ -92,17 +98,40 @@ namespace SyntheticPortfolio.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Login(LoginVM entity)
         {
+            try
+            {
+                if (entity.Username==null ||entity.Password==null)
+                {
+                    TempData["ErrorMSG"] = "Access Denied! Invalid Credential";
+                    return View(entity);
+                }
+                if (!ModelState.IsValid)
+                    return View(entity);
+                string result = DataServiceAPI.DownloadData($"/IB/Authen/{entity.Username}/{entity.Password}");
+                bool isLogin = Convert.ToBoolean(result);
+                if (isLogin)
+                {//Login Success
+                 //For Set Authentication in Cookie (Remeber ME Option)
+                    SignInRemember(entity.Username, entity.isRemember);
 
-            //Login Success
-            //For Set Authentication in Cookie (Remeber ME Option)
-            SignInRemember(entity.Username, entity.isRemember);
+                    //Set A Unique ID in session
+                    Session["UserID"] = entity.Password;
 
-            //Set A Unique ID in session
-            Session["UserID"] = entity.Password;
-
-            // If we got this far, something failed, redisplay form
-            // return RedirectToAction("Index", "Dashboard");
-            return RedirectToLocal(entity.ReturnURL);
+                    // If we got this far, something failed, redisplay form
+                    // return RedirectToAction("Index", "Dashboard");
+                    return RedirectToLocal(entity.ReturnURL);
+                }
+                else
+                {
+                    TempData["ErrorMSG"] = "Access Denied! Wrong Credential";
+                    return View(entity);
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMSG"] = ex.Message;
+                return View(entity);
+            }
 
         }
 

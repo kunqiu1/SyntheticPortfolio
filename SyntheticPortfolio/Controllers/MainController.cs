@@ -24,7 +24,6 @@ namespace SyntheticPortfolio.Controllers
         private string format_pct = "0.0000%";
         private string DateFormat = @"MM/dd/yy HH:mm";
         private string DateFormat2 = @"MM/dd/yyyy";
-        private string ApiUrl;
         private int IBPort;
         private int MDPort;
         private int IBId;
@@ -33,7 +32,8 @@ namespace SyntheticPortfolio.Controllers
         private bool m_isconnect;
         public MainController()
         {
-            ApiUrl = ConfigurationManager.AppSettings["APIURL"].ToString();
+            string ApiUrl = ConfigurationManager.AppSettings["APIURL"].ToString();
+            DataServiceAPI.Initialize(ApiUrl);
             IBPort = Convert.ToInt32(ConfigurationManager.AppSettings["IBPort"]);
             MDPort = Convert.ToInt32(ConfigurationManager.AppSettings["MDPort"]);
             IBId = Convert.ToInt32(ConfigurationManager.AppSettings["IBId"]);
@@ -73,18 +73,18 @@ namespace SyntheticPortfolio.Controllers
             m_isconnect = IsConnected() ? true : false;
             if (m_isconnect)
             {
-                var acct = DownloadData("IB/Account");
+                var acct = DataServiceAPI.DownloadData("IB/Account");
                 PortfolioData.AccountData = JsonConvert.DeserializeObject<IEnumerable<IBAccountModel>>(acct);
-                var port = DownloadData("IB/Portfolio");
+                var port = DataServiceAPI.DownloadData("IB/Portfolio");
                 PortfolioData.Portfolio = JsonConvert.DeserializeObject<IEnumerable<IBPortfolioModel>>(port);
-                var cashstart = DownloadData("IB/CashBalanceStart");
+                var cashstart = DataServiceAPI.DownloadData("IB/CashBalanceStart");
                 PortfolioData.AUMSinceIncp = Convert.ToDouble(cashstart);
-                var strats = DownloadData("IB/Strategy");
+                var strats = DataServiceAPI.DownloadData("IB/Strategy");
 
                 PortfolioData.AllAvailableStrategies = JsonConvert.DeserializeObject<IEnumerable<IBStrategy>>(strats).Select(x => x.StrategyName).ToList();
-                UploadData(PortfolioData.MDTickers, "MD/StartMktReq");
+                DataServiceAPI.UploadData(PortfolioData.MDTickers, "MD/StartMktReq");
 
-                var mdTickers = DownloadData("MD/MarketData");
+                var mdTickers = DataServiceAPI.DownloadData("MD/MarketData");
                 PortfolioData.RefreshMDTickers(JsonConvert.DeserializeObject<IEnumerable<MktData>>(mdTickers));
 
 
@@ -124,26 +124,10 @@ namespace SyntheticPortfolio.Controllers
 
         #endregion
         #region DataServiceRequest
-        private string DownloadData(string controller)
-        {
-            string result = string.Empty;
-            using (var client = new WebClient { UseDefaultCredentials = true })
-            {
-                result = client.DownloadString(ApiUrl + controller);
-            };
-            return result;
-        }
-        private void UploadData(dynamic Data,string controller)
-        {
-            using (var client = new WebClient { UseDefaultCredentials = true })
-            {
-                client.Headers.Add(HttpRequestHeader.ContentType, "application/json; charset=utf-8");
-                client.UploadString(ApiUrl + controller, JsonConvert.SerializeObject(Data));
-            }
-        }
+
         public bool IsConnected()
         {
-            return Convert.ToBoolean(DownloadData("IB/IsConnected"));
+            return Convert.ToBoolean(DataServiceAPI.DownloadData("IB/IsConnected"));
         }
         #endregion
 
@@ -152,16 +136,16 @@ namespace SyntheticPortfolio.Controllers
         [HttpGet]
         public ActionResult LoginAccount()
         {
-            DownloadData($"IB/login/{IBPort}/{IBId}");
-            DownloadData($"MD/login/{MDPort}/{MDId}");
+            DataServiceAPI.DownloadData($"IB/login/{IBPort}/{IBId}");
+            DataServiceAPI.DownloadData($"MD/login/{MDPort}/{MDId}");
             return Json("Request sent", JsonRequestBehavior.AllowGet);
         }
 
         [HttpGet]
         public ActionResult LogoutAccount()
         {
-            DownloadData("IB/logout");
-            DownloadData("MD/logout");
+            DataServiceAPI.DownloadData("IB/logout");
+            DataServiceAPI.DownloadData("MD/logout");
             return Json("Request sent", JsonRequestBehavior.AllowGet);
         }
         [HttpGet]
@@ -182,7 +166,7 @@ namespace SyntheticPortfolio.Controllers
         [HttpPost]
         public HttpStatusCodeResult UpdateSecurity(IBstrategyMapping input)
         {
-            UploadData(input, "IB/UpdateStrategy");
+            DataServiceAPI.UploadData(input, "IB/UpdateStrategy");
             return new HttpStatusCodeResult(HttpStatusCode.OK);
         }
         #endregion

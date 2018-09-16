@@ -148,6 +148,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\CheckAuthorization.cs" />
+    <Compile Include="Models\DataServiceAPI.cs" />
     <Compile Include="Models\IBStrategy.cs" />
     <Compile Include="Models\IBstrategyMapping.cs" />
     <Compile Include="Models\LoginMV.cs" />
