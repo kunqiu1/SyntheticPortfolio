@@ -12,6 +12,7 @@ using WVAPIDataModels;
 
 namespace SyntheticPortfolio.Controllers
 {
+    [CheckAuthorization]
     public class MainController : Controller
     {
         #region Initialize
