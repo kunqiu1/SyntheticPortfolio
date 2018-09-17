@@ -188,16 +188,17 @@ namespace SyntheticPortfolio.Models
                 (PortfolioData.ExcessLiquidty * AdjFactor).ToString(format0));
             summaryData.Add("LVG",
                 (PortfolioData.LeverageRatio).ToString(format_pct0));
+            summaryData.Add("Init Margin",
+                (PortfolioData.InitialMargin * AdjFactor).ToString(format0));
             summaryData.Add("Incpt P&L",
                 ((PortfolioData.AUM - PortfolioData.AUMSinceIncp) * AdjFactor).ToString(format0));
             summaryData.Add("Incpt Rtn",
                 ((PortfolioData.AUM / PortfolioData.AUMSinceIncp - 1)).ToString(format_pct0));
-            summaryData.Add("DVD Rcvble",
-                (PortfolioData.DividendReceivable).ToString(format0));
             summaryData.Add("Daily P&L",
-                (PortfolioData.DailyPL * AdjFactor).ToString(format0));
-            summaryData.Add("Init Margin",
-                (PortfolioData.InitialMargin * AdjFactor).ToString(format0));
+                (PortfolioData.DailyPL).ToString(format0));
+            summaryData.Add("Daily Rtn",
+                ((PortfolioData.DailyPL) / AUM ).ToString(format_pct0));
+
             return summaryData;
         }
         public static Dictionary<PerformanceSummary, IEnumerable<IBPortfolioModel>> GetPortfolioByStrategy()

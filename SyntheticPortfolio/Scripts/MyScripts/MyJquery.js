@@ -1,9 +1,10 @@
 ﻿$(function () {
+    var MainPath = "/Main";
     var AllStrategies;
     var CurrentSecurity;
     $.ajax({
         async: false,
-        url: "/Main/GetAvailableStrategies",
+        url: MainPath+"/GetAvailableStrategies",
         type: 'GET',
         success: function (data) {
             AllStrategies = data;
@@ -11,12 +12,12 @@
     })
 
     $('#btnConnection').click(function () {
-        $.getJSON("/Main/LoginAccount", function (data) {
+        $.getJSON(MainPath+"/LoginAccount", function (data) {
             location.reload();
         })
     })
     $('#btnDisConnection').click(function () {
-        $.getJSON("/Main/LogoutAccount", function (data) {
+        $.getJSON(MainPath+"/LogoutAccount", function (data) {
             location.reload();
         })
     })
@@ -29,7 +30,7 @@
         }
         $.ajax({
             async: false,
-            url: "/Main/UpdateSecurity",
+            url: MainPath+"/UpdateSecurity",
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(raw),
@@ -45,7 +46,7 @@
     $('.tblStrategy').DataTable();
     $('.tblSecType').DataTable();
     function format(d) {
-        var col = ['Ticker', 'Type', 'Pos', 'Strike', 'Moneyness', 'Premium', 'MV', 'Delta', 'Gamma', 'Theta', 'Vega', 'DailyPL', 'UnPL', 'RzPL'];
+        var col = ['Ticker', 'Type', 'Pos', 'Strike', 'Moneyness', 'Premium', 'MV', 'Delta', 'Gamma', 'Theta', 'Vega', 'UnPL', 'RzPL', 'DailyPL'];
         var result = '<table class="table table-condensed table-bordered " style="table-layout:fixed;font-size:11px;font-weight:300;"><thead><tr>';
         $.each(col, function (i, item) {
             result += '<th>' + item + '</th>';
@@ -53,7 +54,7 @@
         result += '</tr></thead><tbody>';
         $.ajax({
             async: false,
-            url: "/Main/GetOptionLegs/",
+            url: MainPath+"/GetOptionLegs/",
             type: 'GET',
             contentType: 'application/json',
             data: { tag: d[1] },
@@ -72,9 +73,9 @@
                         + '<td>' + Math.round(item.Gamma, 4) + '</td>'
                         + '<td>' + Math.round(item.Theta, 4) + '</td>'
                         + '<td>' + Math.round(item.Vega, 4) + '</td>'
-                        + '<td>' + item.DailyPNL + '</td>'
                         + '<td>' + item.unrealizedPNL + '</td>'
                         + '<td>' + item.realizedPNL + '</td>'
+                        + '<td>' + Math.round(item.DailyPNL, 2) + '</td>'
                         + '</tr>';
                 })
             },
@@ -96,7 +97,7 @@
                     "defaultContent": ''
                 },
                 null, null, null, null, null, null, null, null, null, null,
-                null, null
+                null, null,null
             ]
         });
     $('#tblSecTypeOption tbody').on('click', 'td.details-control', function () {

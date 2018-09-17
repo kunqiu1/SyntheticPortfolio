@@ -29,8 +29,9 @@
                 <ul class="nav navbar-nav">
                     <li>@Html.ActionLink("Portfolio Summary", "Index", "Main")</li>
                     <li>@Html.ActionLink("Strategy", "StrategyPage", "Main")</li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
                     <li>@Html.ActionLink("Logout", "Logout", "Home")</li>
-
                 </ul>
             </div>
         </div>
@@ -38,8 +39,7 @@
     <div class="container body-content">
         @RenderBody()
         <hr />
-        <footer>
-        </footer>
+        <footer></footer>
     </div>
 
 

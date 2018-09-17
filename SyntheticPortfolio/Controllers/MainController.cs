@@ -106,6 +106,8 @@ namespace SyntheticPortfolio.Controllers
                 ViewBag.summaryData = PortfolioData.GetAccountSummary();
                 ViewBag.portfolioData = PortfolioData.GetPortfolioBySecType();
                 ViewBag.MktSummaryData = MktSummaryData;
+                ViewBag.NumFormat = format0;
+                ViewBag.PctFormat = format_pct0;
             }
             return View();
         }
@@ -113,6 +115,9 @@ namespace SyntheticPortfolio.Controllers
         {
             RefreshData();
             ViewBag.IsConnect = m_isconnect;
+            ViewBag.NumFormat = format0;
+            ViewBag.PctFormat = format_pct0;
+
             if (m_isconnect)
             {
                 ViewBag.summaryData = PortfolioData.GetAccountSummary();

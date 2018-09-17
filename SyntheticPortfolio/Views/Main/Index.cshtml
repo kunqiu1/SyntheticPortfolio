@@ -35,15 +35,15 @@ else
                     {
                         if (mktitem.last / mktitem.close < 1)
                         {
-                            <td align="center" style="color:darkred">@Math.Round((mktitem.last / mktitem.close - 1) * 100, 2)</td>
+                            <td align="center" style="color:darkred">@((mktitem.last / mktitem.close - 1).ToString(ViewBag.PctFormat))</td>
                         }
                         else
                         {
-                            <td align="center" style="color:lightseagreen">@Math.Round((mktitem.last / mktitem.close - 1) * 100, 2)</td>
+                            <td align="center" style="color:lightseagreen">@((mktitem.last / mktitem.close - 1).ToString(ViewBag.PctFormat))</td>
 
                         }
                     }
-            </tbody>
+</tbody>
         </table>
     </div>
 
@@ -83,7 +83,7 @@ else
                             <div class="panel-heading">
                                 <button type="button" class="btn btn-lg btn-block btn-collapse" data-toggle="collapse" data-target="#@item.PortfolioType">
                                     <span class="glyphicon glyphicon-fire"></span>
-                                    @item.PortfolioType <span class="badge">@item.NumSecurities </span>  <span class="badge">@(Math.Round(item.MarketValuePct * 100) + "%")</span>
+                                    @item.PortfolioType <span class="badge">@item.NumSecurities </span>  <span class="badge">@item.MarketValuePct.ToString(ViewBag.PctFormat)</span>
                                 </button>
                                 <table class="table" style="font-size:small">
                                     <thead>
@@ -94,16 +94,18 @@ else
                                             <th style="text-align:center">Unrealized P&L</th>
                                             <th style="text-align:center">Reazlied P&L</th>
                                             <th style="text-align:center">Daily P&L</th>
+                                            <th style="text-align:center">Daily Rtn</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td align="center">@Math.Round(item.Premium / 1000, 2)</td>
-                                            <td align="center">@Math.Round(item.MarketValue / 1000, 2)</td>
-                                            <td align="center">@Math.Round(item.Delta )</td>
-                                            <td align="center">@Math.Round(item.UnrealizedPL / 1000, 2)</td>
-                                            <td align="center">@Math.Round(item.RealizedPL / 1000, 2)</td>
-                                            <td align="center">@Math.Round(item.DailyiPL / 1000, 2)</td>
+                                            <td align="center">@item.Premium.ToString(ViewBag.NumFormat)</td>
+                                            <td align="center">@item.MarketValue.ToString(ViewBag.NumFormat)</td>
+                                            <td align="center">@item.Delta.ToString(ViewBag.NumFormat)</td>
+                                            <td align="center">@item.UnrealizedPL.ToString(ViewBag.NumFormat)</td>
+                                            <td align="center">@item.RealizedPL.ToString(ViewBag.NumFormat)</td>
+                                            <td align="center">@item.DailyiPL.ToString(ViewBag.NumFormat)</td>
+                                            <td align="center">@((item.DailyiPL/Math.Abs(item.MarketValue)).ToString(ViewBag.PctFormat))</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -129,7 +131,8 @@ else
                                                         <th>Vega</th>
                                                         <th>UnPL</th>
                                                         <th>DailyPL</th>
- 
+                                                        <th>DailyRtn</th>
+
 
                                                     </tr>
                                                 </thead>
@@ -142,15 +145,15 @@ else
                                                         <td>@pos.contract.Symbol</td>
                                                         <td>@pos.Underlying</td>
                                                         <td>@DateTime.ParseExact(pos.contract.LastTradeDateOrContractMonth, "yyyyMMdd", CultureInfo.InvariantCulture).ToString("yyyy/MM/dd")</td>
-                                                        <td>@Math.Round(pos.premium)</td>
-                                                        <td>@Math.Round(pos.marketValue)</td>
-                                                        <td>@Math.Round(pos.Delta)</td>
-                                                        <td>@Math.Round(pos.Gamma)</td>
-                                                        <td>@Math.Round(pos.Theta)</td>
-                                                        <td>@Math.Round(pos.Vega)</td>
-                                                        <td>@Math.Round(pos.unrealizedPNL)</td>
-                                                        <td>@Math.Round(pos.DailyPNL)</td>
-           
+                                                        <td>@pos.premium.ToString(ViewBag.NumFormat)</td>
+                                                        <td>@pos.marketValue.ToString(ViewBag.NumFormat)</td>
+                                                        <td>@pos.Delta.ToString(ViewBag.NumFormat)</td>
+                                                        <td>@pos.Gamma.ToString(ViewBag.NumFormat)</td>
+                                                        <td>@pos.Theta.ToString(ViewBag.NumFormat)</td>
+                                                        <td>@pos.Vega.ToString(ViewBag.NumFormat)</td>
+                                                        <td>@pos.unrealizedPNL.ToString(ViewBag.NumFormat)</td>
+                                                        <td>@pos.DailyPNL.ToString(ViewBag.NumFormat)</td>
+                                                        <td>@((pos.DailyPNL / Math.Abs(pos.marketValue)).ToString(ViewBag.PctFormat))</td>
                                                     </tr>
                                                     }
                                                 </tbody>
@@ -170,10 +173,9 @@ else
                                                         <th>Delta</th>
                                                         <th>UnPL</th>
                                                         <th>RzPL</th>
-                                                        <th>Strtgy</th>
-                                                        <th>LastUpdate</th>
-                                                        <th></th>
-                                                        <th></th>
+                                                        <th>DailyPL</th>
+                                                        <th>DailyRtn</th>
+
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -182,17 +184,15 @@ else
                                                     <tr>
                                                         <td>@pos.tickerName</td>
                                                         <td>@pos.position</td>
-                                                        <td>@Math.Round(pos.averageCost, 2)</td>
-                                                        <td>@Math.Round(pos.marketPrice, 2)</td>
-                                                        <td>@Math.Round(pos.premium)</td>
-                                                        <td>@Math.Round(pos.marketValue)</td>
-                                                        <td>@Math.Round(pos.Delta)</td>
-                                                        <td>@Math.Round(pos.unrealizedPNL)</td>
-                                                        <td>@Math.Round(pos.realizedPNL)</td>
-                                                        <td>@pos.strategyName</td>
-                                                        <td>@pos.LastUpdate.ToShortTimeString()</td>
-                                                        <td>@pos.exchange</td>
-                                                        <td>@pos.contractID</td>
+                                                        <td>@pos.averageCost.ToString(ViewBag.NumFormat)</td>
+                                                        <td>@pos.marketPrice.ToString(ViewBag.NumFormat)</td>
+                                                        <td>@pos.premium.ToString(ViewBag.NumFormat)</td>
+                                                        <td>@pos.marketValue.ToString(ViewBag.NumFormat)</td>
+                                                        <td>@pos.Delta.ToString(ViewBag.NumFormat)</td>
+                                                        <td>@pos.unrealizedPNL.ToString(ViewBag.NumFormat)</td>
+                                                        <td>@pos.realizedPNL.ToString(ViewBag.NumFormat)</td>
+                                                        <td>@pos.DailyPNL.ToString(ViewBag.NumFormat)</td>
+                                                        <td>@((pos.DailyPNL / Math.Abs(pos.marketValue)).ToString(ViewBag.PctFormat))</td>
                                                     </tr>
                                                     }
                                                 </tbody>
