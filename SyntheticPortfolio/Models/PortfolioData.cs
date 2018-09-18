@@ -71,10 +71,7 @@ namespace SyntheticPortfolio.Models
         }
         public static double DailyPL
         {
-            get
-            {
-                return Portfolio.Select(x => x.DailyPNL).Sum();
-            }
+            get;set;
         }
 
 

@@ -12,10 +12,11 @@ using WVAPIDataModels;
 
 namespace SyntheticPortfolio.Controllers
 {
-    [CheckAuthorization]
+    //[CheckAuthorization]
     public class MainController : Controller
     {
         #region Initialize
+
         private string format0 = "#,##0";
         private string format1 = "#,##0.00";
         private string format2 = "#,##0.0000";
@@ -87,13 +88,19 @@ namespace SyntheticPortfolio.Controllers
                 var mdTickers = DataServiceAPI.DownloadData("MD/MarketData");
                 PortfolioData.RefreshMDTickers(JsonConvert.DeserializeObject<IEnumerable<MktData>>(mdTickers));
 
-
+                var dailyPL = DataServiceAPI.DownloadData("IB/DailyPL");
+                PortfolioData.DailyPL = Convert.ToDouble(dailyPL);
 
             }
         }
-
+        private bool IsConnected()
+        {
+            return Convert.ToBoolean(DataServiceAPI.DownloadData("IB/IsConnected"));
+        }
 
         #endregion
+
+
         #region WebPage
         public ActionResult Index()
         {
@@ -128,13 +135,8 @@ namespace SyntheticPortfolio.Controllers
 
 
         #endregion
-        #region DataServiceRequest
 
-        public bool IsConnected()
-        {
-            return Convert.ToBoolean(DataServiceAPI.DownloadData("IB/IsConnected"));
-        }
-        #endregion
+
 
 
         #region get
@@ -163,9 +165,10 @@ namespace SyntheticPortfolio.Controllers
         {
 
             var result = PortfolioData.Portfolio.Where(x => x.strategyNameOption == tag).ToList();
-            return Json(result,JsonRequestBehavior.AllowGet);
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
         #endregion
+
 
         #region POST
         [HttpPost]
