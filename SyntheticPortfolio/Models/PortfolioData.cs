@@ -71,7 +71,7 @@ namespace SyntheticPortfolio.Models
         }
         public static double DailyPL
         {
-            get;set;
+            get; set;
         }
 
 
@@ -157,10 +157,15 @@ namespace SyntheticPortfolio.Models
                     {
                         port.marketPrice = mdticker.last;
                         port.Underlying = mdticker.lastunderlying;
-                        port.Delta = mdticker.delta * port.position * multiplier * mdticker.lastunderlying * 0.01;
-                        port.Gamma = mdticker.gamma * port.position * multiplier * mdticker.lastunderlying * 0.01;
-                        port.Theta = mdticker.theta * port.position * multiplier;
-                        port.Vega = mdticker.vega * port.position * multiplier;
+                        if (port.secType == "OPT" || port.secType == "FOP")
+                        {
+                            {
+                                port.Delta = mdticker.delta * port.position * multiplier * mdticker.lastunderlying * 0.01;
+                            }
+                            port.Gamma = mdticker.gamma * port.position * multiplier * mdticker.lastunderlying * 0.01;
+                            port.Theta = mdticker.theta * port.position * multiplier;
+                            port.Vega = mdticker.vega * port.position * multiplier;
+                        }
                     }
                     var portOption = MDTickers.Where(x => (x.contract.SecType == "OPT" || x.contract.SecType == "FOP")
                     && x.contract.Symbol == mdticker.contract.LocalSymbol);
@@ -194,7 +199,7 @@ namespace SyntheticPortfolio.Models
             summaryData.Add("Daily P&L",
                 (PortfolioData.DailyPL).ToString(format0));
             summaryData.Add("Daily Rtn",
-                ((PortfolioData.DailyPL) / AUM ).ToString(format_pct0));
+                ((PortfolioData.DailyPL) / AUM).ToString(format_pct0));
 
             return summaryData;
         }
@@ -271,9 +276,16 @@ namespace SyntheticPortfolio.Models
             summary.MarketValuePct = summary.MarketValue / Portfolio.Select(x => x.marketValue).Sum();
             summary.Premium = port.Select(x => x.premium).Sum();
             summary.Delta = port.Select(x => x.Delta).Sum();
+            summary.Gamma = port.Select(x => x.Gamma).Sum();
+            summary.Vega = port.Select(x => x.Vega).Sum();
+            summary.Theta = port.Select(x => x.Theta).Sum();
             summary.UnrealizedPL = port.Select(x => x.unrealizedPNL).Sum();
             summary.RealizedPL = port.Select(x => x.realizedPNL).Sum();
             summary.DailyiPL = port.Select(x => x.DailyPNL).Sum();
+            summary.Duration = port.Select(x => x.Duration * x.marketValue / summary.MarketValue).Sum();
+            summary.Yield = port.Select(x => x.DividendsYield * x.marketValue / summary.MarketValue).Sum();
+            summary.AccruedDvd = port.Select(x => x.DividendsAccrued).Sum();
+            summary.Exposure = port.Select(x => x.Delta*100).Sum();
             return summary;
         }
 
@@ -293,6 +305,11 @@ namespace SyntheticPortfolio.Models
         public double Gamma { get; set; }
         public double Theta { get; set; }
         public double Vega { get; set; }
+        public double Duration { get; set; }
+        public double Yield { get; set; }
+        public double AccruedDvd { get; set; }
+        public double Exposure { get; set; }
+
 
     }
 }

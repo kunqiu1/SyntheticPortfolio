@@ -82,6 +82,10 @@
                                                     <th>CostBasis</th>
                                                     <th>MktValue</th>
                                                     <th>Delta</th>
+                                                    <th>Yield</th>
+                                                    <th>Duration</th>
+                                                    <th>AccruedDvd</th>
+                                                    <th>Exposure</th>
                                                     <th>UnPL</th>
                                                     <th>RzPL</th>
                                                     <th>DailyPL</th>
@@ -107,10 +111,14 @@
                                                     <td>@(pos.premium.ToString(ViewBag.NumFormat))</td>
                                                     <td>@(pos.marketValue.ToString(ViewBag.NumFormat))</td>
                                                     <td>@(pos.Delta.ToString(ViewBag.NumFormat))</td>
+                                                    <td>@(pos.DividendsYield.ToString(ViewBag.PctFormat))</td>
+                                                    <td>@(pos.Duration.ToString(ViewBag.NumFormat))</td>
+                                                    <td>@(pos.DividendsAccrued.ToString(ViewBag.NumFormat))</td>
+                                                    <td>@((pos.longShortRatio*pos.marketValue).ToString(ViewBag.NumFormat))</td>
                                                     <td>@(pos.unrealizedPNL.ToString(ViewBag.NumFormat))</td>
                                                     <td>@(pos.realizedPNL.ToString(ViewBag.NumFormat))</td>
                                                     <td>@(pos.DailyPNL.ToString(ViewBag.NumFormat))</td>
-                                                    <td>@((pos.DailyPNL/Math.Abs(pos.marketValue)).ToString(ViewBag.PctFormat))</td>
+                                                    <td>@((pos.DailyPNL / Math.Abs(pos.marketValue)).ToString(ViewBag.PctFormat))</td>
 
                                                 </tr>
                                                 }

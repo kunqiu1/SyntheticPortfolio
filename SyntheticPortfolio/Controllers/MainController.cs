@@ -12,7 +12,7 @@ using WVAPIDataModels;
 
 namespace SyntheticPortfolio.Controllers
 {
-    //[CheckAuthorization]
+    [CheckAuthorization]
     public class MainController : Controller
     {
         #region Initialize
@@ -132,7 +132,23 @@ namespace SyntheticPortfolio.Controllers
             }
             return View("StrategyPage");
         }
+        public ActionResult DashBoard()
+        {
+            RefreshData();
+            ViewBag.IsConnect = m_isconnect;
+            if (m_isconnect)
+            {
+                List<MatlabContractModel> MktSummaryData = PortfolioData.MDTickers.Where(x => MktSummaryTickers.Contains(x.contract.ConId)).ToList();
 
+                ViewBag.summaryData = PortfolioData.GetAccountSummary();
+                ViewBag.portfolioSecurity = PortfolioData.GetPortfolioBySecType();
+                ViewBag.portfolioStrategy = PortfolioData.GetPortfolioByStrategy();
+                ViewBag.MktSummaryData = MktSummaryData;
+                ViewBag.NumFormat = format0;
+                ViewBag.PctFormat = format_pct0;
+            }
+            return View();
+        }
 
         #endregion
 

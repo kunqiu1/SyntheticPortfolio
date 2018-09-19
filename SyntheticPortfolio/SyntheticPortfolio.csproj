@@ -206,6 +206,7 @@
     <Content Include="Views\Main\Index.cshtml" />
     <Content Include="Views\Main\StrategyPage.cshtml" />
     <Content Include="Views\Home\Login.cshtml" />
+    <Content Include="Views\Main\DashBoard.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

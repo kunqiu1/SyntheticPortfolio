@@ -3,51 +3,13 @@
 @using System.Globalization;
 
 @{
+    /**/
+
     ViewBag.Title = "Portfolio Summary";
 }
 <br />
-@if (!ViewBag.IsConnect)
+@if (ViewBag.IsConnect)
 {
-    <button id="btnConnection" class="btn btn-agree btn-block">Connect</button>
-}
-else
-{
-    <button class=" btn btn-block btn-action-main">Market Summary</button>
-    <div class=" row">
-        <table class="display table" style="font-size:small; font-weight:600 ;table-layout:fixed">
-            <thead>
-                <tr>
-                    @foreach (MatlabContractModel mktitem in ViewBag.MktSummaryData)
-                    {
-                        <th style="text-align:center">@mktitem.contract.Symbol</th>
-                    }
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    @foreach (MatlabContractModel mktitem in ViewBag.MktSummaryData)
-                    {
-                        <td align="center">@Math.Round(mktitem.last,2)</td>
-                    }
-                </tr>
-                <tr>
-                    @foreach (MatlabContractModel mktitem in ViewBag.MktSummaryData)
-                    {
-                        if (mktitem.last / mktitem.close < 1)
-                        {
-                            <td align="center" style="color:darkred">@((mktitem.last / mktitem.close - 1).ToString(ViewBag.PctFormat))</td>
-                        }
-                        else
-                        {
-                            <td align="center" style="color:lightseagreen">@((mktitem.last / mktitem.close - 1).ToString(ViewBag.PctFormat))</td>
-
-                        }
-                    }
-</tbody>
-        </table>
-    </div>
-
-    <button id="btnDisConnection" class="btn btn-disagree  btn-block">Disconnect</button>
     <br />
     <div class="row">
         <div class="col-lg-12">
@@ -105,7 +67,7 @@ else
                                             <td align="center">@item.UnrealizedPL.ToString(ViewBag.NumFormat)</td>
                                             <td align="center">@item.RealizedPL.ToString(ViewBag.NumFormat)</td>
                                             <td align="center">@item.DailyiPL.ToString(ViewBag.NumFormat)</td>
-                                            <td align="center">@((item.DailyiPL/Math.Abs(item.MarketValue)).ToString(ViewBag.PctFormat))</td>
+                                            <td align="center">@((item.DailyiPL / Math.Abs(item.MarketValue)).ToString(ViewBag.PctFormat))</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -139,22 +101,22 @@ else
                                                 <tbody>
                                                     @foreach (IBPortfolioModel pos in ViewBag.portfolioData[item])
                                                     {
-                                                    <tr>
-                                                        <td></td>
-                                                        <td>@pos.strategyNameOption</td>
-                                                        <td>@pos.contract.Symbol</td>
-                                                        <td>@pos.Underlying</td>
-                                                        <td>@DateTime.ParseExact(pos.contract.LastTradeDateOrContractMonth, "yyyyMMdd", CultureInfo.InvariantCulture).ToString("yyyy/MM/dd")</td>
-                                                        <td>@pos.premium.ToString(ViewBag.NumFormat)</td>
-                                                        <td>@pos.marketValue.ToString(ViewBag.NumFormat)</td>
-                                                        <td>@pos.Delta.ToString(ViewBag.NumFormat)</td>
-                                                        <td>@pos.Gamma.ToString(ViewBag.NumFormat)</td>
-                                                        <td>@pos.Theta.ToString(ViewBag.NumFormat)</td>
-                                                        <td>@pos.Vega.ToString(ViewBag.NumFormat)</td>
-                                                        <td>@pos.unrealizedPNL.ToString(ViewBag.NumFormat)</td>
-                                                        <td>@pos.DailyPNL.ToString(ViewBag.NumFormat)</td>
-                                                        <td>@((pos.DailyPNL / Math.Abs(pos.marketValue)).ToString(ViewBag.PctFormat))</td>
-                                                    </tr>
+                                                        <tr>
+                                                            <td></td>
+                                                            <td>@pos.strategyNameOption</td>
+                                                            <td>@pos.contract.Symbol</td>
+                                                            <td>@pos.Underlying</td>
+                                                            <td>@DateTime.ParseExact(pos.contract.LastTradeDateOrContractMonth, "yyyyMMdd", CultureInfo.InvariantCulture).ToString("yyyy/MM/dd")</td>
+                                                            <td>@pos.premium.ToString(ViewBag.NumFormat)</td>
+                                                            <td>@pos.marketValue.ToString(ViewBag.NumFormat)</td>
+                                                            <td>@pos.Delta.ToString(ViewBag.NumFormat)</td>
+                                                            <td>@pos.Gamma.ToString(ViewBag.NumFormat)</td>
+                                                            <td>@pos.Theta.ToString(ViewBag.NumFormat)</td>
+                                                            <td>@pos.Vega.ToString(ViewBag.NumFormat)</td>
+                                                            <td>@pos.unrealizedPNL.ToString(ViewBag.NumFormat)</td>
+                                                            <td>@pos.DailyPNL.ToString(ViewBag.NumFormat)</td>
+                                                            <td>@((pos.DailyPNL / Math.Abs(pos.marketValue)).ToString(ViewBag.PctFormat))</td>
+                                                        </tr>
                                                     }
                                                 </tbody>
                                             </table>
@@ -181,19 +143,19 @@ else
                                                 <tbody>
                                                     @foreach (IBPortfolioModel pos in ViewBag.portfolioData[item])
                                                     {
-                                                    <tr>
-                                                        <td>@pos.tickerName</td>
-                                                        <td>@pos.position</td>
-                                                        <td>@pos.averageCost.ToString(ViewBag.NumFormat)</td>
-                                                        <td>@pos.marketPrice.ToString(ViewBag.NumFormat)</td>
-                                                        <td>@pos.premium.ToString(ViewBag.NumFormat)</td>
-                                                        <td>@pos.marketValue.ToString(ViewBag.NumFormat)</td>
-                                                        <td>@pos.Delta.ToString(ViewBag.NumFormat)</td>
-                                                        <td>@pos.unrealizedPNL.ToString(ViewBag.NumFormat)</td>
-                                                        <td>@pos.realizedPNL.ToString(ViewBag.NumFormat)</td>
-                                                        <td>@pos.DailyPNL.ToString(ViewBag.NumFormat)</td>
-                                                        <td>@((pos.DailyPNL / Math.Abs(pos.marketValue)).ToString(ViewBag.PctFormat))</td>
-                                                    </tr>
+                                                        <tr>
+                                                            <td>@pos.tickerName</td>
+                                                            <td>@pos.position</td>
+                                                            <td>@pos.averageCost.ToString(ViewBag.NumFormat)</td>
+                                                            <td>@pos.marketPrice.ToString(ViewBag.NumFormat)</td>
+                                                            <td>@pos.premium.ToString(ViewBag.NumFormat)</td>
+                                                            <td>@pos.marketValue.ToString(ViewBag.NumFormat)</td>
+                                                            <td>@pos.Delta.ToString(ViewBag.NumFormat)</td>
+                                                            <td>@pos.unrealizedPNL.ToString(ViewBag.NumFormat)</td>
+                                                            <td>@pos.realizedPNL.ToString(ViewBag.NumFormat)</td>
+                                                            <td>@pos.DailyPNL.ToString(ViewBag.NumFormat)</td>
+                                                            <td>@((pos.DailyPNL / Math.Abs(pos.marketValue)).ToString(ViewBag.PctFormat))</td>
+                                                        </tr>
                                                     }
                                                 </tbody>
                                             </table>
