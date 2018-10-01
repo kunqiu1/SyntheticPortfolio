@@ -71,7 +71,10 @@ namespace SyntheticPortfolio.Models
         }
         public static double DailyPL
         {
-            get; set;
+            get
+            {
+                return portfolio.Sum(x => x.DailyPNL);
+            }
         }
 
 
@@ -135,15 +138,15 @@ namespace SyntheticPortfolio.Models
                 if (mdticker != null)
                 {
                     double multiplier = 1;
-                    if (mdticker.contract.Multiplier != null)
-                    {
-                        multiplier = Convert.ToDouble(mdticker.contract.Multiplier);
-                    }
                     mdticker.last = ProcessMKTData(item, "lastPrice", mdticker.last);
                     mdticker.open = ProcessMKTData(item, "open", mdticker.open);
                     mdticker.high = ProcessMKTData(item, "high", mdticker.high);
                     mdticker.low = ProcessMKTData(item, "low", mdticker.low);
                     mdticker.close = ProcessMKTData(item, "close", mdticker.close);
+                    if (mdticker.last == 0)
+                    {
+                        mdticker.last = mdticker.close;
+                    }
                     mdticker.delta = ProcessMKTData(item, "delta", mdticker.delta);
                     mdticker.gamma = ProcessMKTData(item, "gamma", mdticker.gamma);
                     mdticker.theta = ProcessMKTData(item, "theta", mdticker.theta);
@@ -151,11 +154,28 @@ namespace SyntheticPortfolio.Models
                     mdticker.last = ProcessMKTData(item, "optPrice", mdticker.last);
                     mdticker.delta = ProcessMKTData(item, "delta", mdticker.delta);
                     mdticker.iv = ProcessMKTData(item, "iv", mdticker.iv);
+                    mdticker.bid = ProcessMKTData(item, "bidPrice", mdticker.iv);
+                    mdticker.ask = ProcessMKTData(item, "askPrice", mdticker.iv);
+                    mdticker.lastunderlying = ProcessMKTData(item, "undPrice", mdticker.iv);
+
 
                     var port = portfolio.Where(x => x.contractID == item.ConId).FirstOrDefault();
                     if (port != null)
                     {
+                        if (port.contract.Multiplier != null)
+                        {
+                            multiplier = Convert.ToDouble(port.contract.Multiplier);
+                        }
+                        else
+                        {
+                            multiplier = 1;
+                        }
                         port.marketPrice = mdticker.last;
+                        port.Bid = mdticker.bid;
+                        port.Ask = mdticker.ask;
+                        port.ImpliedVol = mdticker.iv;
+
+                        //port.DailyPNL = port.realizedPNL + port.position * (port.marketPrice - mdticker.close) * multiplier;
                         port.Underlying = mdticker.lastunderlying;
                         if (port.secType == "OPT" || port.secType == "FOP")
                         {
@@ -168,7 +188,7 @@ namespace SyntheticPortfolio.Models
                         }
                     }
                     var portOption = MDTickers.Where(x => (x.contract.SecType == "OPT" || x.contract.SecType == "FOP")
-                    && x.contract.Symbol == mdticker.contract.LocalSymbol);
+                        && x.contract.Symbol == mdticker.contract.LocalSymbol);
                     foreach (var option in portOption)
                     {
                         option.lastunderlying = mdticker.last != 0 ? mdticker.last : mdticker.close;
@@ -185,21 +205,23 @@ namespace SyntheticPortfolio.Models
         {
             Dictionary<string, string> summaryData = new Dictionary<string, string>();
             summaryData.Add("AUM",
-                (PortfolioData.AUM * AdjFactor).ToString(format0));
-            summaryData.Add("CuSh",
-                (PortfolioData.ExcessLiquidty * AdjFactor).ToString(format0));
-            summaryData.Add("LVG",
-                (PortfolioData.LeverageRatio).ToString(format_pct0));
+                (AUM * AdjFactor).ToString(format0));
+            //summaryData.Add("CuSh",
+            //    (PortfolioData.ExcessLiquidty * AdjFactor).ToString(format0));
+            //summaryData.Add("LVG",
+            //    (PortfolioData.LeverageRatio).ToString(format_pct0));
             summaryData.Add("Init Margin",
-                (PortfolioData.InitialMargin * AdjFactor).ToString(format0));
+                (InitialMargin * AdjFactor).ToString(format0));
             summaryData.Add("Incpt P&L",
-                ((PortfolioData.AUM - PortfolioData.AUMSinceIncp) * AdjFactor).ToString(format0));
+                ((AUM - AUMSinceIncp) * AdjFactor).ToString(format0));
             summaryData.Add("Incpt Rtn",
-                ((PortfolioData.AUM / PortfolioData.AUMSinceIncp - 1)).ToString(format_pct0));
+                ((AUM / AUMSinceIncp - 1)).ToString(format_pct0));
+            summaryData.Add("Unrlz P&L",
+                (UnPL * AdjFactor).ToString(format0));
             summaryData.Add("Daily P&L",
-                (PortfolioData.DailyPL).ToString(format0));
+                (DailyPL).ToString(format0));
             summaryData.Add("Daily Rtn",
-                ((PortfolioData.DailyPL) / AUM).ToString(format_pct0));
+                (DailyPL / AUM).ToString(format_pct0));
 
             return summaryData;
         }
@@ -214,6 +236,9 @@ namespace SyntheticPortfolio.Models
                 summary.PortfolioType = item;
                 portfolioData.Add(summary, port);
             }
+            var Summary = getPerformanceSummary(portfolio);
+            Summary.PortfolioType = "zTotal";
+            portfolioData.Add(Summary, portfolio);
             return portfolioData;
         }
 
@@ -257,6 +282,29 @@ namespace SyntheticPortfolio.Models
                         posOption.Vega = portOptiontemp.Select(x => x.Vega).Sum();
                         posOption.LastUpdate = portOptiontemp.Select(x => x.LastUpdate).First();
                         posOption.Notes = portOptiontemp.Count().ToString();
+                        if (portOptiontemp.Count() == 1)
+                        {
+                            posOption.Bid = portOptiontemp.Select(x => x.Bid).FirstOrDefault();
+                            posOption.Ask = portOptiontemp.Select(x => x.Ask).FirstOrDefault();
+                        }
+                        else
+                        {
+                            double ask = 0;
+                            double bid = 0;
+                            foreach (var item3 in portOptiontemp)
+                            {
+                                if (item3.position > 0)
+                                {
+                                    posOption.Bid += item3.Bid;
+                                    posOption.Ask += item3.Ask;
+                                }
+                                if (item3.position < 0)
+                                {
+                                    posOption.Bid -= item3.Ask;
+                                    posOption.Ask -= item3.Bid;
+                                }
+                            }
+                        }
                         portOption.Add(posOption);
                     }
                     portfolioData.Add(summary, portOption);
@@ -285,7 +333,8 @@ namespace SyntheticPortfolio.Models
             summary.Duration = port.Select(x => x.Duration * x.marketValue / summary.MarketValue).Sum();
             summary.Yield = port.Select(x => x.DividendsYield * x.marketValue / summary.MarketValue).Sum();
             summary.AccruedDvd = port.Select(x => x.DividendsAccrued).Sum();
-            summary.Exposure = port.Select(x => x.Delta*100).Sum();
+            summary.AnnDvd = port.Select(x => x.marketValue * x.DividendsYield).Sum();
+            summary.Exposure = port.Select(x => x.Delta * 100).Sum();
             return summary;
         }
 
@@ -308,6 +357,8 @@ namespace SyntheticPortfolio.Models
         public double Duration { get; set; }
         public double Yield { get; set; }
         public double AccruedDvd { get; set; }
+        public double AnnDvd { get; set; }
+
         public double Exposure { get; set; }
 
 

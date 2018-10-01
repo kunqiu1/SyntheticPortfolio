@@ -1,10 +1,10 @@
 ﻿$(function () {
-    var MainPath = "/Main";
+    var MainPath = "/Matrix/Main";
     var AllStrategies;
     var CurrentSecurity;
     $.ajax({
         async: false,
-        url: MainPath+"/GetAvailableStrategies",
+        url: MainPath + "/GetAvailableStrategies",
         type: 'GET',
         success: function (data) {
             AllStrategies = data;
@@ -12,12 +12,12 @@
     })
 
     $('#btnConnection').click(function () {
-        $.getJSON(MainPath+"/LoginAccount", function (data) {
+        $.getJSON(MainPath + "/LoginAccount", function (data) {
             location.reload();
         })
     })
     $('#btnDisConnection').click(function () {
-        $.getJSON(MainPath+"/LogoutAccount", function (data) {
+        $.getJSON(MainPath + "/LogoutAccount", function (data) {
             location.reload();
         })
     })
@@ -30,7 +30,7 @@
         }
         $.ajax({
             async: false,
-            url: MainPath+"/UpdateSecurity",
+            url: MainPath + "/UpdateSecurity",
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(raw),
@@ -46,7 +46,7 @@
     $('.tblStrategy').DataTable();
     $('.tblSecType').DataTable();
     function format(d) {
-        var col = ['Ticker', 'Type', 'Pos', 'Strike', 'Moneyness', 'Premium', 'MV', 'Delta', 'Gamma', 'Theta', 'Vega', 'UnPL', 'RzPL', 'DailyPL'];
+        var col = ['Ticker', 'DailyPL', 'Pos', 'Bid', 'Ask', 'Cost', 'Type', 'Strike', 'S0', 'Moneyness', 'Premium', 'MV', 'IV', 'Delta', 'Gamma', 'Theta', 'Vega', 'UnPL', 'RzPL'];
         var result = '<table class="table table-condensed table-bordered " style="table-layout:fixed;font-size:11px;font-weight:300;"><thead><tr>';
         $.each(col, function (i, item) {
             result += '<th>' + item + '</th>';
@@ -54,7 +54,7 @@
         result += '</tr></thead><tbody>';
         $.ajax({
             async: false,
-            url: MainPath+"/GetOptionLegs/",
+            url: MainPath + "/GetOptionLegs/",
             type: 'GET',
             contentType: 'application/json',
             data: { tag: d[1] },
@@ -63,19 +63,24 @@
                     result +=
                         '<tr>'
                         + '<td>' + item.tickerName + '</td>'
-                        + '<td>' + item.contract.Right + '</td>'
+                        + '<td>' + Math.round(item.DailyPNL) + '</td>'
                         + '<td>' + item.position + '</td>'
+                        + '<td>' + item.Bid + '</td>'
+                        + '<td>' + item.Ask + '</td>'
+                        + '<td>' + (item.averageCost / item.contract.Multiplier).toFixed(2) + '</td>'
+                        + '<td>' + item.contract.Right + '</td>'
                         + '<td>' + item.contract.Strike + '</td>'
-                        + '<td>' + Math.round(item.contract.Strike / item.Underlying * 100) + '</td>'
+                        + '<td>' + item.Underlying.toFixed(2) + '</td>'
+                        + '<td>' + (item.contract.Strike / item.Underlying * 100).toFixed(2) + '</td>'
                         + '<td>' + Math.round(item.premium) + '</td>'
                         + '<td>' + Math.round(item.marketValue) + '</td>'
-                        + '<td>' + Math.round(item.Delta, 4) + '</td>'
-                        + '<td>' + Math.round(item.Gamma, 4) + '</td>'
-                        + '<td>' + Math.round(item.Theta, 4) + '</td>'
-                        + '<td>' + Math.round(item.Vega, 4) + '</td>'
+                        + '<td>' + item.ImpliedVol.toFixed(2) + '</td>'
+                        + '<td>' + Math.round(item.Delta) + '</td>'
+                        + '<td>' + Math.round(item.Gamma) + '</td>'
+                        + '<td>' + Math.round(item.Theta) + '</td>'
+                        + '<td>' + Math.round(item.Vega) + '</td>'
                         + '<td>' + item.unrealizedPNL + '</td>'
                         + '<td>' + item.realizedPNL + '</td>'
-                        + '<td>' + Math.round(item.DailyPNL, 2) + '</td>'
                         + '</tr>';
                 })
             },
@@ -97,7 +102,7 @@
                     "defaultContent": ''
                 },
                 null, null, null, null, null, null, null, null, null, null,
-                null, null,null
+                null, null, null, null
             ]
         });
     $('#tblSecTypeOption tbody').on('click', 'td.details-control', function () {

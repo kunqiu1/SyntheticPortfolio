@@ -12,8 +12,6 @@
 else
 {
     <button id="btnDisConnection" class="btn btn-disagree  btn-block">Disconnect</button>
-    <div style="overflow:auto;">
-
         <div class=" row">
             <table class="display table table-responsive table-bordered table-striped" style="font-size:small; font-weight:600 ;table-layout:fixed">
                 <caption style="font-size:large;font-weight:600;text-align:center">Market Summary</caption>
@@ -48,8 +46,6 @@ else
                 </tbody>
             </table>
         </div>
-    </div>
-    <div style="overflow:auto;">
         <div class="row">
             <table class="display table table-responsive table-striped" style="font-size:small; font-weight:600 ;table-layout:fixed">
                 <caption style="font-size:large;font-weight:600;text-align:center">Account Snapshot</caption>
@@ -71,7 +67,6 @@ else
                 </tbody>
             </table>
         </div>
-    </div>
     <div style="overflow:auto;">
         @*<ul class="nav nav-tabs">
                 <li role="presentation" class=""><a href="#StrategySummary">StrategySummary</a></li>
@@ -85,6 +80,8 @@ else
             <thead>
                 <tr>
                     <th>Strategy</th>
+                    <th>DailyPL</th>
+                    <th>DailyRtn</th>
                     <th>Cost</th>
                     <th>MV</th>
                     <th>MV(ls)</th>
@@ -95,30 +92,32 @@ else
                     <th>Duration</th>
                     <th>DvdYield</th>
                     <th>DvdAcrud</th>
+                    <th>DvdAnnEst</th>
                     <th>UnrlzPL</th>
-                    <th>DailyPL</th>
-                    <th>DailyRtn</th>
+
                 </tr>
             </thead>
             <tbody>
                 @foreach (PerformanceSummary item in ViewBag.portfolioStrategy.Keys)
                 {
-                    <tr>
-                        <td>@item.PortfolioType</td>
-                        <td>@item.Premium.ToString(ViewBag.NumFormat)</td>
-                        <td>@item.MarketValue.ToString(ViewBag.NumFormat)</td>
-                        <td>@item.Exposure.ToString(ViewBag.NumFormat)</td>
-                        <td>@item.Delta.ToString(ViewBag.NumFormat)</td>
-                        <td>@item.Gamma.ToString(ViewBag.NumFormat)</td>
-                        <td>@item.Vega.ToString(ViewBag.NumFormat)</td>
-                        <td>@item.Theta.ToString(ViewBag.NumFormat)</td>
-                        <td>@item.Duration.ToString(ViewBag.NumFormat)</td>
-                        <td>@item.Yield.ToString(ViewBag.PctFormat)</td>
-                        <td>@item.AccruedDvd.ToString(ViewBag.NumFormat)</td>
-                        <td>@item.UnrealizedPL.ToString(ViewBag.NumFormat)</td>
-                        <td>@item.DailyiPL.ToString(ViewBag.NumFormat)</td>
-                        <td>@((item.DailyiPL / Math.Abs(item.MarketValue)).ToString(ViewBag.PctFormat))</td>
-                    </tr>
+                <tr>
+                    <td>@item.PortfolioType</td>
+                    <td>@item.DailyiPL.ToString(ViewBag.NumFormat)</td>
+                    <td>@((item.DailyiPL / Math.Abs(item.MarketValue)).ToString(ViewBag.PctFormat))</td>
+                    <td>@item.Premium.ToString(ViewBag.NumFormat)</td>
+                    <td>@item.MarketValue.ToString(ViewBag.NumFormat)</td>
+                    <td>@item.Exposure.ToString(ViewBag.NumFormat)</td>
+                    <td>@item.Delta.ToString(ViewBag.NumFormat)</td>
+                    <td>@item.Gamma.ToString(ViewBag.NumFormat)</td>
+                    <td>@item.Vega.ToString(ViewBag.NumFormat)</td>
+                    <td>@item.Theta.ToString(ViewBag.NumFormat)</td>
+                    <td>@item.Duration.ToString(ViewBag.NumFormat)</td>
+                    <td>@item.Yield.ToString(ViewBag.PctFormat)</td>
+                    <td>@item.AccruedDvd.ToString(ViewBag.NumFormat)</td>
+                    <td>@item.AnnDvd.ToString(ViewBag.NumFormat)</td>
+                    <td>@item.UnrealizedPL.ToString(ViewBag.NumFormat)</td>
+
+                </tr>
                 }
             </tbody>
         </table>

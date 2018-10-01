@@ -55,19 +55,6 @@ namespace SyntheticPortfolio.Controllers
                 i++;
                 MktSummaryTickers.Add(c.ConId);
             }
-            List<string> temp2 = ConfigurationManager.AppSettings["TickersSTK"].ToString().Split(';').ToList();
-            foreach (var item in temp2)
-            {
-                List<string> temp0 = item.Split(',').ToList();
-                var c = new Contract();
-                c.Symbol = temp0[0];
-                c.LocalSymbol = temp0[0];
-                c.PrimaryExch = temp0[1];
-                c.ConId = Convert.ToInt32(temp0[2]);
-                c.SecType = "STK";
-                PortfolioData.AddMDTickers(c);
-                i++;
-            }
         }
         public void RefreshData()
         {
@@ -81,15 +68,20 @@ namespace SyntheticPortfolio.Controllers
                 var cashstart = DataServiceAPI.DownloadData("IB/CashBalanceStart");
                 PortfolioData.AUMSinceIncp = Convert.ToDouble(cashstart);
                 var strats = DataServiceAPI.DownloadData("IB/Strategy");
-
                 PortfolioData.AllAvailableStrategies = JsonConvert.DeserializeObject<IEnumerable<IBStrategy>>(strats).Select(x => x.StrategyName).ToList();
-                DataServiceAPI.UploadData(PortfolioData.MDTickers, "MD/StartMktReq");
 
+
+                var ibsecurity = DataServiceAPI.DownloadData("MD/IBSecurity");
+                var ibsecurities = JsonConvert.DeserializeObject<IEnumerable<Contract>>(ibsecurity).ToList();
+                foreach (var item in ibsecurities)
+                    PortfolioData.AddMDTickers(item);
+
+                DataServiceAPI.UploadData(PortfolioData.MDTickers, "MD/StartMktReq");
                 var mdTickers = DataServiceAPI.DownloadData("MD/MarketData");
                 PortfolioData.RefreshMDTickers(JsonConvert.DeserializeObject<IEnumerable<MktData>>(mdTickers));
 
-                var dailyPL = DataServiceAPI.DownloadData("IB/DailyPL");
-                PortfolioData.DailyPL = Convert.ToDouble(dailyPL);
+                //var dailyPL = DataServiceAPI.DownloadData("IB/DailyPL");
+                //PortfolioData.DailyPL = Convert.ToDouble(dailyPL);
 
             }
         }
@@ -114,6 +106,7 @@ namespace SyntheticPortfolio.Controllers
                 ViewBag.portfolioData = PortfolioData.GetPortfolioBySecType();
                 ViewBag.MktSummaryData = MktSummaryData;
                 ViewBag.NumFormat = format0;
+                ViewBag.NumFormat1 = format1;
                 ViewBag.PctFormat = format_pct0;
             }
             return View();
@@ -123,6 +116,7 @@ namespace SyntheticPortfolio.Controllers
             RefreshData();
             ViewBag.IsConnect = m_isconnect;
             ViewBag.NumFormat = format0;
+            ViewBag.NumFormat1 = format1;
             ViewBag.PctFormat = format_pct0;
 
             if (m_isconnect)
@@ -141,8 +135,8 @@ namespace SyntheticPortfolio.Controllers
                 List<MatlabContractModel> MktSummaryData = PortfolioData.MDTickers.Where(x => MktSummaryTickers.Contains(x.contract.ConId)).ToList();
 
                 ViewBag.summaryData = PortfolioData.GetAccountSummary();
-                ViewBag.portfolioSecurity = PortfolioData.GetPortfolioBySecType();
                 ViewBag.portfolioStrategy = PortfolioData.GetPortfolioByStrategy();
+                ViewBag.summary=
                 ViewBag.MktSummaryData = MktSummaryData;
                 ViewBag.NumFormat = format0;
                 ViewBag.PctFormat = format_pct0;
@@ -151,8 +145,6 @@ namespace SyntheticPortfolio.Controllers
         }
 
         #endregion
-
-
 
 
         #region get

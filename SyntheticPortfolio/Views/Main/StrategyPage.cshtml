@@ -48,8 +48,9 @@
                                             <th style="text-align:center">Cost Basis</th>
                                             <th style="text-align:center">Market Value</th>
                                             <th style="text-align:center">Delta</th>
-                                            <th style="text-align:center">Unrealized P&L</th>
-                                            <th style="text-align:center">Reazlied P&L</th>
+                                            <th style="text-align:center">Unlz P&L</th>
+                                            <th style="text-align:center">Duration</th>
+                                            <th style="text-align:center">Yield</th>
                                             <th style="text-align:center">Daily P&L</th>
                                             <th style="text-align:center">Daily Rtn</th>
                                         </tr>
@@ -60,7 +61,8 @@
                                             <td align="center">@item.MarketValue.ToString(ViewBag.NumFormat)</td>
                                             <td align="center">@item.Delta.ToString(ViewBag.NumFormat)</td>
                                             <td align="center">@item.UnrealizedPL.ToString(ViewBag.NumFormat)</td>
-                                            <td align="center">@item.RealizedPL.ToString(ViewBag.NumFormat)</td>
+                                            <td align="center">@item.Duration.ToString(ViewBag.NumFormat)</td>
+                                            <td align="center">@item.Yield.ToString(ViewBag.PctFormat)</td>
                                             <td align="center">@item.DailyiPL.ToString(ViewBag.NumFormat)</td>
                                             <td align="center">@((item.DailyiPL / Math.Abs(item.MarketValue)).ToString(ViewBag.PctFormat))</td>
                                         </tr>
@@ -75,6 +77,8 @@
                                                 <tr>
                                                     <th>Action</th>
                                                     <th>Ticker</th>
+                                                    <th>DailyPL</th>
+                                                    <th>DailyRtn</th>
                                                     <th>Type</th>
                                                     <th>Pos</th>
                                                     <th>AveCost</th>
@@ -88,8 +92,7 @@
                                                     <th>Exposure</th>
                                                     <th>UnPL</th>
                                                     <th>RzPL</th>
-                                                    <th>DailyPL</th>
-                                                    <th>DailyRtn</th>
+
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -104,21 +107,22 @@
                                                         </button>
                                                     </td>
                                                     <td>@pos.tickerName</td>
+                                                    <td>@(pos.DailyPNL.ToString(ViewBag.NumFormat))</td>
+                                                    <td>@((pos.DailyPNL / Math.Abs(pos.marketValue)).ToString(ViewBag.PctFormat))</td>
                                                     <td>@pos.secType</td>
                                                     <td>@pos.position</td>
-                                                    <td>@(pos.averageCost.ToString(ViewBag.NumFormat))</td>
-                                                    <td>@(pos.marketPrice.ToString(ViewBag.NumFormat))</td>
+                                                    <td>@(pos.averageCost.ToString(ViewBag.NumFormat1))</td>
+                                                    <td>@(pos.marketPrice.ToString(ViewBag.NumFormat1))</td>
                                                     <td>@(pos.premium.ToString(ViewBag.NumFormat))</td>
                                                     <td>@(pos.marketValue.ToString(ViewBag.NumFormat))</td>
                                                     <td>@(pos.Delta.ToString(ViewBag.NumFormat))</td>
                                                     <td>@(pos.DividendsYield.ToString(ViewBag.PctFormat))</td>
                                                     <td>@(pos.Duration.ToString(ViewBag.NumFormat))</td>
                                                     <td>@(pos.DividendsAccrued.ToString(ViewBag.NumFormat))</td>
-                                                    <td>@((pos.longShortRatio*pos.marketValue).ToString(ViewBag.NumFormat))</td>
+                                                    <td>@((pos.longShortRatio * pos.marketValue).ToString(ViewBag.NumFormat))</td>
                                                     <td>@(pos.unrealizedPNL.ToString(ViewBag.NumFormat))</td>
                                                     <td>@(pos.realizedPNL.ToString(ViewBag.NumFormat))</td>
-                                                    <td>@(pos.DailyPNL.ToString(ViewBag.NumFormat))</td>
-                                                    <td>@((pos.DailyPNL / Math.Abs(pos.marketValue)).ToString(ViewBag.PctFormat))</td>
+
 
                                                 </tr>
                                                 }
