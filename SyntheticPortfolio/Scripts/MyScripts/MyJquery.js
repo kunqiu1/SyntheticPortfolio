@@ -1,5 +1,5 @@
 ﻿$(function () {
-    var MainPath = "/Matrix/Main";
+    var MainPath = "/Main";
     var AllStrategies;
     var CurrentSecurity;
     $.ajax({

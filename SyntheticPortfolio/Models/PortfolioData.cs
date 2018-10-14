@@ -137,6 +137,10 @@ namespace SyntheticPortfolio.Models
                 var mdticker = MDTickers.Where(x => x.contract.ConId == item.ConId).FirstOrDefault();
                 if (mdticker != null)
                 {
+                    if (mdticker.contract.ConId == 330500628)
+                    {
+
+                    }
                     double multiplier = 1;
                     mdticker.last = ProcessMKTData(item, "lastPrice", mdticker.last);
                     mdticker.open = ProcessMKTData(item, "open", mdticker.open);
@@ -154,10 +158,8 @@ namespace SyntheticPortfolio.Models
                     mdticker.last = ProcessMKTData(item, "optPrice", mdticker.last);
                     mdticker.delta = ProcessMKTData(item, "delta", mdticker.delta);
                     mdticker.iv = ProcessMKTData(item, "iv", mdticker.iv);
-                    mdticker.bid = ProcessMKTData(item, "bidPrice", mdticker.iv);
-                    mdticker.ask = ProcessMKTData(item, "askPrice", mdticker.iv);
-                    mdticker.lastunderlying = ProcessMKTData(item, "undPrice", mdticker.iv);
-
+                    mdticker.bid = ProcessMKTData(item, "bidPrice", mdticker.bid);
+                    mdticker.ask = ProcessMKTData(item, "askPrice", mdticker.ask);
 
                     var port = portfolio.Where(x => x.contractID == item.ConId).FirstOrDefault();
                     if (port != null)
@@ -176,22 +178,20 @@ namespace SyntheticPortfolio.Models
                         port.ImpliedVol = mdticker.iv;
 
                         //port.DailyPNL = port.realizedPNL + port.position * (port.marketPrice - mdticker.close) * multiplier;
-                        port.Underlying = mdticker.lastunderlying;
                         if (port.secType == "OPT" || port.secType == "FOP")
                         {
-                            {
-                                port.Delta = mdticker.delta * port.position * multiplier * mdticker.lastunderlying * 0.01;
-                            }
-                            port.Gamma = mdticker.gamma * port.position * multiplier * mdticker.lastunderlying * 0.01;
+                            port.Underlying = ProcessMKTData(item, "undPrice", port.Underlying);
+                            port.Delta = mdticker.delta * port.position * multiplier * port.Underlying * 0.01;
+                            port.Gamma = mdticker.gamma * port.position * multiplier * port.Underlying * 0.01;
                             port.Theta = mdticker.theta * port.position * multiplier;
                             port.Vega = mdticker.vega * port.position * multiplier;
                         }
                     }
-                    var portOption = MDTickers.Where(x => (x.contract.SecType == "OPT" || x.contract.SecType == "FOP")
+                    var portOption = portfolio.Where(x => (x.contract.SecType == "OPT" || x.contract.SecType == "FOP")
                         && x.contract.Symbol == mdticker.contract.LocalSymbol);
                     foreach (var option in portOption)
                     {
-                        option.lastunderlying = mdticker.last != 0 ? mdticker.last : mdticker.close;
+                        option.Underlying = mdticker.last != 0 ? mdticker.last : mdticker.close;
                     }
                 }
             }
@@ -271,7 +271,7 @@ namespace SyntheticPortfolio.Models
                         posOption.contract.Symbol = portOptiontemp.Select(x => x.contract.Symbol).First();
                         posOption.Underlying = portOptiontemp.Select(x => x.Underlying).First();
                         posOption.marketValue = portOptiontemp.Select(x => x.marketValue).Sum();
-                        posOption.averageCost = portOptiontemp.Select(x => x.averageCost).Sum();
+                        posOption.averageCost = portOptiontemp.Select(x => x.averageCost * (x.position / Math.Abs(x.position))).Sum();
                         posOption.premium = portOptiontemp.Select(x => x.premium).Sum();
                         posOption.unrealizedPNL = portOptiontemp.Select(x => x.unrealizedPNL).Sum();
                         posOption.realizedPNL = portOptiontemp.Select(x => x.realizedPNL).Sum();

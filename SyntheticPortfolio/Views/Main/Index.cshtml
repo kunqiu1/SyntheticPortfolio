@@ -110,7 +110,7 @@
                                                         <td>@((pos.DailyPNL / Math.Abs(pos.marketValue)).ToString(ViewBag.PctFormat))</td>
                                                         <td>@pos.Bid</td>
                                                         <td>@pos.Ask</td>
-                                                        <td>@pos.averageCost/@Convert.ToDouble(pos.contract.Multiplier)</td>
+                                                        <td>@((pos.averageCost/100).ToString(ViewBag.NumFormat1))</td>
                                                         <td>@DateTime.ParseExact(pos.contract.LastTradeDateOrContractMonth, "yyyyMMdd", CultureInfo.InvariantCulture).ToString("yyyy/MM/dd")</td>
                                                         <td>@pos.premium.ToString(ViewBag.NumFormat)</td>
                                                         <td>@pos.marketValue.ToString(ViewBag.NumFormat)</td>
