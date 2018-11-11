@@ -10,7 +10,9 @@
     border-style:groove;
     border-width:thick;
 }
-
+th, td {
+    white-space: nowrap;
+}
 a {
     color: black;
 }

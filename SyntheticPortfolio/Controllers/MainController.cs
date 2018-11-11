@@ -4,6 +4,7 @@ using SyntheticPortfolio.Models;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Dynamic;
 using System.Linq;
 using System.Net;
 using System.Web;
@@ -29,8 +30,8 @@ namespace SyntheticPortfolio.Controllers
         private int MDPort;
         private int IBId;
         private int MDId;
-        private List<int> MktSummaryTickers;
-        private bool m_isconnect;
+        private List<MktData> MktSummaryTickers;
+        private bool m_isconnect { get; set; }
         public MainController()
         {
             string ApiUrl = ConfigurationManager.AppSettings["APIURL"].ToString();
@@ -39,22 +40,7 @@ namespace SyntheticPortfolio.Controllers
             MDPort = Convert.ToInt32(ConfigurationManager.AppSettings["MDPort"]);
             IBId = Convert.ToInt32(ConfigurationManager.AppSettings["IBId"]);
             MDId = Convert.ToInt32(ConfigurationManager.AppSettings["MDId"]);
-            MktSummaryTickers = new List<int>();
-            List<string> temp = ConfigurationManager.AppSettings["TickersFUT"].ToString().Split(';').ToList();
-            int i = 1;
-            foreach (var item in temp)
-            {
-                List<string> temp0 = item.Split(',').ToList();
-                var c = new Contract();
-                c.Symbol = temp0[0];
-                c.PrimaryExch = temp0[1];
-                c.LastTradeDateOrContractMonth = temp0[2];
-                c.ConId = Convert.ToInt32(temp0[3]);
-                c.SecType = "FUT";
-                PortfolioData.AddMDTickers(c);
-                i++;
-                MktSummaryTickers.Add(c.ConId);
-            }
+            MktSummaryTickers = new List<MktData>();
         }
         public void RefreshData()
         {
@@ -69,19 +55,8 @@ namespace SyntheticPortfolio.Controllers
                 PortfolioData.AUMSinceIncp = Convert.ToDouble(cashstart);
                 var strats = DataServiceAPI.DownloadData("IB/Strategy");
                 PortfolioData.AllAvailableStrategies = JsonConvert.DeserializeObject<IEnumerable<IBStrategy>>(strats).Select(x => x.StrategyName).ToList();
-
-
-                var ibsecurity = DataServiceAPI.DownloadData("MD/IBSecurity");
-                var ibsecurities = JsonConvert.DeserializeObject<IEnumerable<Contract>>(ibsecurity).ToList();
-                foreach (var item in ibsecurities)
-                    PortfolioData.AddMDTickers(item);
-
-                DataServiceAPI.UploadData(PortfolioData.MDTickers, "MD/StartMktReq");
-                var mdTickers = DataServiceAPI.DownloadData("MD/MarketData");
-                PortfolioData.RefreshMDTickers(JsonConvert.DeserializeObject<IEnumerable<MktData>>(mdTickers));
-
-                //var dailyPL = DataServiceAPI.DownloadData("IB/DailyPL");
-                //PortfolioData.DailyPL = Convert.ToDouble(dailyPL);
+                var mktsummary = DataServiceAPI.DownloadData("MD/GetMarketSummary");
+                MktSummaryTickers = JsonConvert.DeserializeObject<IEnumerable<MktData>>(mktsummary).ToList();
 
             }
         }
@@ -94,17 +69,30 @@ namespace SyntheticPortfolio.Controllers
 
 
         #region WebPage
+        public ActionResult DashBoard()
+        {
+            RefreshData();
+            ViewBag.IsConnect = m_isconnect;
+            if (m_isconnect)
+            {
+                ViewBag.summaryData = PortfolioData.GetAccountSummary();
+                ViewBag.portfolioStrategy = PortfolioData.GetPortfolioByStrategy();
+                ViewBag.MktSummaryData = MktSummaryTickers;
+                ViewBag.NumFormat = format0;
+                ViewBag.PctFormat = format_pct0;
+            }
+            return View();
+        }
+
         public ActionResult Index()
         {
             RefreshData();
             ViewBag.IsConnect = m_isconnect;
             if (m_isconnect)
             {
-                List<MatlabContractModel> MktSummaryData = PortfolioData.MDTickers.Where(x => MktSummaryTickers.Contains(x.contract.ConId)).ToList();
-
                 ViewBag.summaryData = PortfolioData.GetAccountSummary();
                 ViewBag.portfolioData = PortfolioData.GetPortfolioBySecType();
-                ViewBag.MktSummaryData = MktSummaryData;
+                ViewBag.MktSummaryData = MktSummaryTickers;
                 ViewBag.NumFormat = format0;
                 ViewBag.NumFormat1 = format1;
                 ViewBag.PctFormat = format_pct0;
@@ -126,23 +114,8 @@ namespace SyntheticPortfolio.Controllers
             }
             return View("StrategyPage");
         }
-        public ActionResult DashBoard()
-        {
-            RefreshData();
-            ViewBag.IsConnect = m_isconnect;
-            if (m_isconnect)
-            {
-                List<MatlabContractModel> MktSummaryData = PortfolioData.MDTickers.Where(x => MktSummaryTickers.Contains(x.contract.ConId)).ToList();
 
-                ViewBag.summaryData = PortfolioData.GetAccountSummary();
-                ViewBag.portfolioStrategy = PortfolioData.GetPortfolioByStrategy();
-                ViewBag.summary=
-                ViewBag.MktSummaryData = MktSummaryData;
-                ViewBag.NumFormat = format0;
-                ViewBag.PctFormat = format_pct0;
-            }
-            return View();
-        }
+
 
         #endregion
 
@@ -151,8 +124,8 @@ namespace SyntheticPortfolio.Controllers
         [HttpGet]
         public ActionResult LoginAccount()
         {
-            DataServiceAPI.DownloadData($"IB/login/{IBPort}/{IBId}");
             DataServiceAPI.DownloadData($"MD/login/{MDPort}/{MDId}");
+            DataServiceAPI.DownloadData($"IB/login/{IBPort}/{IBId}");
             return Json("Request sent", JsonRequestBehavior.AllowGet);
         }
 
@@ -172,8 +145,55 @@ namespace SyntheticPortfolio.Controllers
         public ActionResult GetOptionLegs(string tag)
         {
 
-            var result = PortfolioData.Portfolio.Where(x => x.strategyNameOption == tag).ToList();
+            var result = PortfolioData.Portfolio.Where(x => x.tickerName == tag).Select(x => x.OptionLegs);
             return Json(result, JsonRequestBehavior.AllowGet);
+        }
+        [HttpGet]
+        public ActionResult GetTradeDetail(string ticker)
+        {
+            var port = PortfolioData.Portfolio.Where(x => x.tickerName == ticker).First();
+
+            dynamic result = new ExpandoObject();
+            result.last = port.marketPrice.ToString(format1);
+            result.bid = port.Bid.ToString(format1);
+            result.ask = port.Ask.ToString(format1);
+            result.DailyPL = port.DailyPNL.ToString(format1);
+            result.UnrlzPL = port.unrealizedPNL.ToString(format1);
+            result.RlzPL = port.realizedPNL.ToString(format1);
+            result.Position = port.position;
+            result.MarketValue = port.marketValue.ToString(format1); ;
+            result.CostBasis = port.premium.ToString(format1);
+            result.LongShort = port.longShortRatio;
+            result.Duration = port.Duration.ToString(format1);
+            result.Yield = port.DividendsYield.ToString(format_pct0);
+            result.DeltaPct = port.Delta1Pct.ToString(format1);
+            result.DeltaDollar = port.DeltaDollar.ToString(format1);
+            return Json(
+                new
+                {
+                    result.last,
+                    result.bid,
+                    result.ask,
+                    result.DailyPL,
+                    result.UnrlzPL,
+                    result.RlzPL,
+                    result.Position,
+                    result.MarketValue,
+                    result.CostBasis,
+                    result.LongShort,
+                    result.Duration,
+                    result.Yield,
+                    result.DeltaPct,
+                    result.DeltaDollar,
+                },
+                    JsonRequestBehavior.AllowGet);
+        }
+        [HttpGet]
+        public ActionResult GetOptionDetail(string ticker)
+        {
+            var port = PortfolioData.Portfolio.Where(x => x.tickerName == ticker).First();
+            var optionlegs = port.OptionLegs;
+            return Json(optionlegs, JsonRequestBehavior.AllowGet);
         }
         #endregion
 

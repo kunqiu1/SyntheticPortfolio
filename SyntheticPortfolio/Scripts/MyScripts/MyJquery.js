@@ -2,6 +2,9 @@
     var MainPath = "/Main";
     var AllStrategies;
     var CurrentSecurity;
+    var CurrentTicker;
+    var tblSecurityModal = $('#tblSecurityModal');
+    var tblOptionTable = $('#tblOptionTable');
     $.ajax({
         async: false,
         url: MainPath + "/GetAvailableStrategies",
@@ -10,7 +13,6 @@
             AllStrategies = data;
         }
     })
-
     $('#btnConnection').click(function () {
         $.getJSON(MainPath + "/LoginAccount", function (data) {
             location.reload();
@@ -92,22 +94,28 @@
         return result;
     };
 
-    var tblSecTypeOption = $('#tblSecTypeOption').DataTable(
+    var tblStrategySummary = $('#tblStrategySummary').DataTable(
         {
-            "columns": [
-                {
-                    "className": 'details-control',
-                    "orderable": false,
-                    "data": null,
-                    "defaultContent": ''
-                },
-                null, null, null, null, null, null, null, null, null, null,
-                null, null, null, null
-            ]
+            //"columns": [
+            //    {
+            //        "className": 'details-control',
+            //        "orderable": false,
+            //        "data": null,
+            //        "defaultContent": ''
+            //    },
+            //    null, null, null, null, null, null, null, null, null, null,
+            //    null, null, null, null, null, null, null
+            //],
+            scrollX: true,
+            scrollCollapse: true,
+            paging: false,
+            fixedColumns: {
+                leftColumns: 2
+            },
         });
-    $('#tblSecTypeOption tbody').on('click', 'td.details-control', function () {
+    $('#tblStrategySummary tbody').on('click', 'td.details-control', function () {
         var tr = $(this).closest('tr');
-        var row = tblSecTypeOption.row(tr);
+        var row = tblStrategySummary.row(tr);
 
         if (row.child.isShown()) {
             // This row is already open - close it
@@ -122,10 +130,12 @@
         }
     });
     $('#modalEditSecurity').on("show.bs.modal", function (e) {
+        $(this).find('.modal-dialog').css('width', $(window).width() * 0.90);
+        $(this).find('.modal-body').css('height', $(window).height() * 0.80)
         $('#SelectStrategy').find('option').remove();
         CurrentSecurity = $(e.relatedTarget).data('position');
-
-        $('#modalheader').html(CurrentSecurity.tickerName);
+        CurrentTicker = CurrentSecurity.tickerName;
+        $('#modalheader').html(CurrentTicker);
         $.each(AllStrategies, function (i, item) {
             $('#SelectStrategy').append($('<option>', {
                 value: item,
@@ -133,7 +143,45 @@
                 selected: item == CurrentSecurity.strategyName
             }))
         })
+        RefreshModalSecurity();
+        RefreshModalOption();
     }).on("hide.bs.modal", function () {
         location.reload();
-    });
+        });
+
+    function RefreshModalSecurity() {
+        $("#tblSecurityModal tr").remove()
+        $.getJSON(MainPath + "/GetTradeDetail", { ticker: CurrentTicker }, function (data) {
+            $.each(data, function (key, value) {
+                newRow(tblSecurityModal, [key, value]);
+            });
+        });
+    }
+    function RefreshModalOption() {
+        if (CurrentSecurity.secType == "OPT" || CurrentSecurity.secType == "FOP") {
+            $("#tblOptionTable tbody tr").remove()
+            $.getJSON(MainPath + "/GetOptionDetail", { ticker: CurrentTicker }, function (data) {
+                $.each(data, function (key, value) {
+                    newRow(tblOptionTable, [value.tickerName, value.DailyPNL.toFixed(2), value.contract.Symbol,
+                        value.Underlying.toFixed(2), value.contract.Strike, (value.contract.Strike / value.Underlying * 100).toFixed(2)+'%',
+                        value.DeltaPoint.toFixed(2) + '%', value.position,
+                        value.marketPrice.toFixed(2), value.Bid, value.Ask, value.premium.toFixed(2),
+                        value.marketValue.toFixed(2), value.unrealizedPNL.toFixed(2), value.Delta1Pct.toFixed(2), value.Gamma.toFixed(2), value.ImpliedVol.toFixed(2)]);
+                });
+            });
+        }
+    }
+    $('#refreshModal').click(function () {
+        RefreshModalSecurity();
+        RefreshModalOption();
+    })
+    function newRow(table, cols) {
+        $row = $('<tr/>');
+        var pct = Math.round(1 / cols.length * 100);
+        for (i = 0; i < cols.length; i++) {
+            $col = $('<td/>').append(cols[i]).prop("width", pct + "%");
+            $row.append($col);
+        }
+        table.append($row);
+    }
 })

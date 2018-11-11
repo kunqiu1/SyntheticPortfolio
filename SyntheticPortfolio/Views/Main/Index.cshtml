@@ -63,7 +63,7 @@
                                         <tr>
                                             <td align="center">@item.Premium.ToString(ViewBag.NumFormat)</td>
                                             <td align="center">@item.MarketValue.ToString(ViewBag.NumFormat)</td>
-                                            <td align="center">@item.Delta.ToString(ViewBag.NumFormat)</td>
+                                            <td align="center">@item.Delta1Pct.ToString(ViewBag.NumFormat)</td>
                                             <td align="center">@item.UnrealizedPL.ToString(ViewBag.NumFormat)</td>
                                             <td align="center">@item.RealizedPL.ToString(ViewBag.NumFormat)</td>
                                             <td align="center">@item.DailyiPL.ToString(ViewBag.NumFormat)</td>
@@ -105,7 +105,7 @@
                                                     {
                                                     <tr>
                                                         <td></td>
-                                                        <td>@pos.strategyNameOption</td>
+                                                        <td>@pos.tickerName</td>
                                                         <td>@pos.DailyPNL.ToString(ViewBag.NumFormat)</td>
                                                         <td>@((pos.DailyPNL / Math.Abs(pos.marketValue)).ToString(ViewBag.PctFormat))</td>
                                                         <td>@pos.Bid</td>
@@ -114,7 +114,7 @@
                                                         <td>@DateTime.ParseExact(pos.contract.LastTradeDateOrContractMonth, "yyyyMMdd", CultureInfo.InvariantCulture).ToString("yyyy/MM/dd")</td>
                                                         <td>@pos.premium.ToString(ViewBag.NumFormat)</td>
                                                         <td>@pos.marketValue.ToString(ViewBag.NumFormat)</td>
-                                                        <td>@pos.Delta.ToString(ViewBag.NumFormat)</td>
+                                                        <td>@pos.Delta1Pct.ToString(ViewBag.NumFormat)</td>
                                                         <td>@pos.Gamma.ToString(ViewBag.NumFormat)</td>
                                                         <td>@pos.Theta.ToString(ViewBag.NumFormat)</td>
                                                         <td>@pos.Vega.ToString(ViewBag.NumFormat)</td>
@@ -157,7 +157,7 @@
                                                         <td>@pos.marketPrice.ToString(ViewBag.NumFormat1)</td>
                                                         <td>@pos.premium.ToString(ViewBag.NumFormat)</td>
                                                         <td>@pos.marketValue.ToString(ViewBag.NumFormat)</td>
-                                                        <td>@pos.Delta.ToString(ViewBag.NumFormat)</td>
+                                                        <td>@pos.Delta1Pct.ToString(ViewBag.NumFormat)</td>
                                                         <td>@pos.unrealizedPNL.ToString(ViewBag.NumFormat)</td>
                                                         <td>@pos.realizedPNL.ToString(ViewBag.NumFormat)</td>
                                                     </tr>

@@ -73,129 +73,14 @@ namespace SyntheticPortfolio.Models
         {
             get
             {
-                return portfolio.Sum(x => x.DailyPNL);
+                return Portfolio.Sum(x => x.DailyPNL);
             }
         }
 
 
         public static double AUMSinceIncp { get; set; }
         public static IEnumerable<IBAccountModel> AccountData { get; set; }
-        private static IEnumerable<IBPortfolioModel> portfolio;
-
-
-
-        public static IEnumerable<IBPortfolioModel> Portfolio
-        {
-            get
-            {
-                return portfolio;
-            }
-            set
-            {
-                portfolio = value;
-                foreach (var item in portfolio)
-                {
-                    AddMDTickers(item.contract);
-                }
-            }
-        }
-
-
-        public static List<MatlabContractModel> MDTickers { get; set; }
-        public static void AddMDTickers(Contract contract)
-        {
-            if (MDTickers == null)
-            {
-                MDTickers = new List<MatlabContractModel>();
-            }
-            if (!MDTickers.Any(x => x.contract.ConId == contract.ConId))
-            {
-
-                int i = 1;
-                if (MDTickers.Count() > 0)
-                {
-                    i = MDTickers.Max(x => x.ReqId) + 1;
-                }
-                MDTickers.Add(new MatlabContractModel(contract, i));
-            }
-        }
-        private static double ProcessMKTData(MktData item, string ticktype, double value)
-        {
-            if (item.mktdata.Keys.Contains(ticktype))
-            {
-                if (item.mktdata[ticktype] != double.MaxValue)
-                {
-                    return item.mktdata[ticktype];
-                }
-            }
-            return value;
-        }
-        internal static void RefreshMDTickers(IEnumerable<MktData> MKTData)
-        {
-            foreach (var item in MKTData)
-            {
-                var mdticker = MDTickers.Where(x => x.contract.ConId == item.ConId).FirstOrDefault();
-                if (mdticker != null)
-                {
-                    if (mdticker.contract.ConId == 330500628)
-                    {
-
-                    }
-                    double multiplier = 1;
-                    mdticker.last = ProcessMKTData(item, "lastPrice", mdticker.last);
-                    mdticker.open = ProcessMKTData(item, "open", mdticker.open);
-                    mdticker.high = ProcessMKTData(item, "high", mdticker.high);
-                    mdticker.low = ProcessMKTData(item, "low", mdticker.low);
-                    mdticker.close = ProcessMKTData(item, "close", mdticker.close);
-                    if (mdticker.last == 0)
-                    {
-                        mdticker.last = mdticker.close;
-                    }
-                    mdticker.delta = ProcessMKTData(item, "delta", mdticker.delta);
-                    mdticker.gamma = ProcessMKTData(item, "gamma", mdticker.gamma);
-                    mdticker.theta = ProcessMKTData(item, "theta", mdticker.theta);
-                    mdticker.vega = ProcessMKTData(item, "vega", mdticker.vega);
-                    mdticker.last = ProcessMKTData(item, "optPrice", mdticker.last);
-                    mdticker.delta = ProcessMKTData(item, "delta", mdticker.delta);
-                    mdticker.iv = ProcessMKTData(item, "iv", mdticker.iv);
-                    mdticker.bid = ProcessMKTData(item, "bidPrice", mdticker.bid);
-                    mdticker.ask = ProcessMKTData(item, "askPrice", mdticker.ask);
-
-                    var port = portfolio.Where(x => x.contractID == item.ConId).FirstOrDefault();
-                    if (port != null)
-                    {
-                        if (port.contract.Multiplier != null)
-                        {
-                            multiplier = Convert.ToDouble(port.contract.Multiplier);
-                        }
-                        else
-                        {
-                            multiplier = 1;
-                        }
-                        port.marketPrice = mdticker.last;
-                        port.Bid = mdticker.bid;
-                        port.Ask = mdticker.ask;
-                        port.ImpliedVol = mdticker.iv;
-
-                        //port.DailyPNL = port.realizedPNL + port.position * (port.marketPrice - mdticker.close) * multiplier;
-                        if (port.secType == "OPT" || port.secType == "FOP")
-                        {
-                            port.Underlying = ProcessMKTData(item, "undPrice", port.Underlying);
-                            port.Delta = mdticker.delta * port.position * multiplier * port.Underlying * 0.01;
-                            port.Gamma = mdticker.gamma * port.position * multiplier * port.Underlying * 0.01;
-                            port.Theta = mdticker.theta * port.position * multiplier;
-                            port.Vega = mdticker.vega * port.position * multiplier;
-                        }
-                    }
-                    var portOption = portfolio.Where(x => (x.contract.SecType == "OPT" || x.contract.SecType == "FOP")
-                        && x.contract.Symbol == mdticker.contract.LocalSymbol);
-                    foreach (var option in portOption)
-                    {
-                        option.Underlying = mdticker.last != 0 ? mdticker.last : mdticker.close;
-                    }
-                }
-            }
-        }
+        public static IEnumerable<IBPortfolioModel> Portfolio { get; set; }
         public static IEnumerable<string> AllAvailableStrategies { get; set; }
 
 
@@ -227,7 +112,7 @@ namespace SyntheticPortfolio.Models
         }
         public static Dictionary<PerformanceSummary, IEnumerable<IBPortfolioModel>> GetPortfolioByStrategy()
         {
-            IEnumerable<string> AllTypes = Portfolio.Select(x => x.strategyName).Distinct();
+            IEnumerable<string> AllTypes = Portfolio.Select(x => x.strategyName).Distinct().OrderBy(x=>x);
             Dictionary<PerformanceSummary, IEnumerable<IBPortfolioModel>> portfolioData = new Dictionary<PerformanceSummary, IEnumerable<IBPortfolioModel>>();
             foreach (var item in AllTypes)
             {
@@ -236,83 +121,22 @@ namespace SyntheticPortfolio.Models
                 summary.PortfolioType = item;
                 portfolioData.Add(summary, port);
             }
-            var Summary = getPerformanceSummary(portfolio);
+            var Summary = getPerformanceSummary(Portfolio);
             Summary.PortfolioType = "zTotal";
-            portfolioData.Add(Summary, portfolio);
+            portfolioData.Add(Summary, Portfolio);
             return portfolioData;
         }
 
         public static Dictionary<PerformanceSummary, IEnumerable<IBPortfolioModel>> GetPortfolioBySecType()
         {
-            IEnumerable<string> AllTypes = Portfolio.Select(x => x.secType).Distinct();
+            IEnumerable<string> AllTypes = Portfolio.OrderBy(x => x.secType).Select(x => x.secType).Distinct();
             Dictionary<PerformanceSummary, IEnumerable<IBPortfolioModel>> portfolioData = new Dictionary<PerformanceSummary, IEnumerable<IBPortfolioModel>>();
             foreach (var item in AllTypes)
             {
                 var port = Portfolio.Where(x => x.secType == item);
                 var summary = getPerformanceSummary(port);
                 summary.PortfolioType = item;
-
-                if (item == "OPT" || item == "FOP")
-                {
-                    summary.Gamma = port.Select(x => x.Gamma).Sum();
-                    summary.Theta = port.Select(x => x.Theta).Sum();
-                    summary.Vega = port.Select(x => x.Vega).Sum();
-                    var portOption = new List<IBPortfolioModel>();
-                    var allOptionstrategy = port.Select(x => x.strategyNameOption).Distinct();
-                    foreach (var item2 in allOptionstrategy)
-                    {
-                        var portOptiontemp = port.Where(x => x.strategyNameOption == item2);
-                        var posOption = new IBPortfolioModel();
-                        posOption.tickerName = portOptiontemp.Select(x => x.contract.Symbol).First();
-                        posOption.strategyNameOption = item2;
-                        posOption.contract = new IBApi.Contract();
-                        posOption.contract.LastTradeDateOrContractMonth = portOptiontemp.Select(x => x.contract.LastTradeDateOrContractMonth).First();
-                        posOption.contract.PrimaryExch = portOptiontemp.Select(x => x.contract.PrimaryExch).First();
-                        posOption.contract.Symbol = portOptiontemp.Select(x => x.contract.Symbol).First();
-                        posOption.Underlying = portOptiontemp.Select(x => x.Underlying).First();
-                        posOption.marketValue = portOptiontemp.Select(x => x.marketValue).Sum();
-                        posOption.averageCost = portOptiontemp.Select(x => x.averageCost * (x.position / Math.Abs(x.position))).Sum();
-                        posOption.premium = portOptiontemp.Select(x => x.premium).Sum();
-                        posOption.unrealizedPNL = portOptiontemp.Select(x => x.unrealizedPNL).Sum();
-                        posOption.realizedPNL = portOptiontemp.Select(x => x.realizedPNL).Sum();
-                        posOption.DailyPNL = portOptiontemp.Select(x => x.DailyPNL).Sum();
-                        posOption.Delta = portOptiontemp.Select(x => x.Delta).Sum();
-                        posOption.Gamma = portOptiontemp.Select(x => x.Gamma).Sum();
-                        posOption.Theta = portOptiontemp.Select(x => x.Theta).Sum();
-                        posOption.Vega = portOptiontemp.Select(x => x.Vega).Sum();
-                        posOption.LastUpdate = portOptiontemp.Select(x => x.LastUpdate).First();
-                        posOption.Notes = portOptiontemp.Count().ToString();
-                        if (portOptiontemp.Count() == 1)
-                        {
-                            posOption.Bid = portOptiontemp.Select(x => x.Bid).FirstOrDefault();
-                            posOption.Ask = portOptiontemp.Select(x => x.Ask).FirstOrDefault();
-                        }
-                        else
-                        {
-                            double ask = 0;
-                            double bid = 0;
-                            foreach (var item3 in portOptiontemp)
-                            {
-                                if (item3.position > 0)
-                                {
-                                    posOption.Bid += item3.Bid;
-                                    posOption.Ask += item3.Ask;
-                                }
-                                if (item3.position < 0)
-                                {
-                                    posOption.Bid -= item3.Ask;
-                                    posOption.Ask -= item3.Bid;
-                                }
-                            }
-                        }
-                        portOption.Add(posOption);
-                    }
-                    portfolioData.Add(summary, portOption);
-                }
-                else
-                {
-                    portfolioData.Add(summary, port);
-                }
+                portfolioData.Add(summary, port);
             }
             return portfolioData;
         }
@@ -323,7 +147,9 @@ namespace SyntheticPortfolio.Models
             summary.MarketValue = port.Select(x => x.marketValue).Sum();
             summary.MarketValuePct = summary.MarketValue / Portfolio.Select(x => x.marketValue).Sum();
             summary.Premium = port.Select(x => x.premium).Sum();
-            summary.Delta = port.Select(x => x.Delta).Sum();
+            summary.Delta1Pct = port.Select(x => x.Delta1Pct).Sum();
+            summary.DeltaPoint = port.Select(x => x.DeltaPoint).Sum();
+            summary.DeltaDollar = port.Select(x => x.DeltaDollar).Sum();
             summary.Gamma = port.Select(x => x.Gamma).Sum();
             summary.Vega = port.Select(x => x.Vega).Sum();
             summary.Theta = port.Select(x => x.Theta).Sum();
@@ -332,9 +158,9 @@ namespace SyntheticPortfolio.Models
             summary.DailyiPL = port.Select(x => x.DailyPNL).Sum();
             summary.Duration = port.Select(x => x.Duration * x.marketValue / summary.MarketValue).Sum();
             summary.Yield = port.Select(x => x.DividendsYield * x.marketValue / summary.MarketValue).Sum();
+            summary.DV01 = port.Select(x => x.DV01).Sum();
             summary.AccruedDvd = port.Select(x => x.DividendsAccrued).Sum();
             summary.AnnDvd = port.Select(x => x.marketValue * x.DividendsYield).Sum();
-            summary.Exposure = port.Select(x => x.Delta * 100).Sum();
             return summary;
         }
 
@@ -345,21 +171,21 @@ namespace SyntheticPortfolio.Models
         public int NumSecurities { get; set; }
         public double MarketValue { get; set; }
         public double Premium { get; set; }
-        public double Notional { get; set; }
         public double DailyiPL { get; set; }
         public double UnrealizedPL { get; set; }
         public double RealizedPL { get; set; }
         public double MarketValuePct { get; set; }
-        public double Delta { get; set; }
+        public double Delta1Pct { get; set; }
+        public double DeltaPoint { get; set; }
+        public double DeltaDollar { get; set; }
         public double Gamma { get; set; }
         public double Theta { get; set; }
         public double Vega { get; set; }
         public double Duration { get; set; }
         public double Yield { get; set; }
+        public double DV01 { get; set; }
         public double AccruedDvd { get; set; }
         public double AnnDvd { get; set; }
-
-        public double Exposure { get; set; }
 
 
     }

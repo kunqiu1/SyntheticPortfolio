@@ -8,27 +8,29 @@
 {
     <div class="row">
         <div class="col-lg-11">
+            <div style="overflow:auto;">
 
-            <table id="tblSummary" class="table  table-responsive" style="font-size:small; font-weight:600 ;table-layout:fixed">
-                <thead style="color:#746232;font-weight:100">
-                    <tr>
-                        @foreach (string item in ViewBag.summaryData.Keys)
-                        {
-                            <th style="text-align:center">@item</th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        @foreach (string item in ViewBag.summaryData.Keys)
-                        {
-                            <td align="center">@ViewBag.summaryData[item]</td>
-                        }
-                    </tr>
-                </tbody>
-            </table>
+                <table id="tblSummary" class="table  table-responsive" style="font-size:small; font-weight:600">
+                    <thead style="color:#746232;font-weight:100">
+                        <tr>
+                            @foreach (string item in ViewBag.summaryData.Keys)
+                            {
+                                <th style="text-align:center">@item</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            @foreach (string item in ViewBag.summaryData.Keys)
+                            {
+                                <td align="center">@ViewBag.summaryData[item]</td>
+                            }
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            </div>
         </div>
-    </div>
     <div class="panel-group">
         <div class="row">
             @foreach (PerformanceSummary item in ViewBag.portfolioData.Keys)
@@ -40,91 +42,102 @@
                             <div class="panel-heading">
                                 <button type="button" class="btn btn-lg btn-block btn-collapse" data-toggle="collapse" data-target="#@item.PortfolioType">
                                     <span class="glyphicon glyphicon-fire"></span>
-                                    @item.PortfolioType <span class="badge">@item.NumSecurities </span>  <span class="badge">@item.MarketValuePct.ToString(ViewBag.PctFormat)</span>
+                                    @if (item.DailyiPL >= 0)
+                                    {
+                                        @item.PortfolioType <span class="badge" style="color:#7bccb8">$ @((item.DailyiPL).ToString(ViewBag.NumFormat))</span>
+                                    }
+                                    else
+                                    {
+                                        @item.PortfolioType <span class="badge" style="color:#db6327">$ @((item.DailyiPL).ToString(ViewBag.NumFormat))</span>
+                                    }
                                 </button>
-                                <table class="table" style="font-size:small">
-                                    <thead>
-                                        <tr>
-                                            <th style="text-align:center">Cost Basis</th>
-                                            <th style="text-align:center">Market Value</th>
-                                            <th style="text-align:center">Delta</th>
-                                            <th style="text-align:center">Unlz P&L</th>
-                                            <th style="text-align:center">Duration</th>
-                                            <th style="text-align:center">Yield</th>
-                                            <th style="text-align:center">Daily P&L</th>
-                                            <th style="text-align:center">Daily Rtn</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td align="center">@item.Premium.ToString(ViewBag.NumFormat)</td>
-                                            <td align="center">@item.MarketValue.ToString(ViewBag.NumFormat)</td>
-                                            <td align="center">@item.Delta.ToString(ViewBag.NumFormat)</td>
-                                            <td align="center">@item.UnrealizedPL.ToString(ViewBag.NumFormat)</td>
-                                            <td align="center">@item.Duration.ToString(ViewBag.NumFormat)</td>
-                                            <td align="center">@item.Yield.ToString(ViewBag.PctFormat)</td>
-                                            <td align="center">@item.DailyiPL.ToString(ViewBag.NumFormat)</td>
-                                            <td align="center">@((item.DailyiPL / Math.Abs(item.MarketValue)).ToString(ViewBag.PctFormat))</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <div style="overflow:auto;">
+                                    <table class="table" style="font-size:small">
+                                        <thead>
+                                            <tr>
+                                                <th style="text-align:center">Cost Basis</th>
+                                                <th style="text-align:center">Market Value</th>
+                                                <th style="text-align:center">Delta</th>
+                                                <th style="text-align:center">$Delta</th>
+                                                <th style="text-align:center">Unlz P&L</th>
+                                                <th style="text-align:center">Duration</th>
+                                                <th style="text-align:center">Daily P&L</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td align="center">@item.Premium.ToString(ViewBag.NumFormat)</td>
+                                                <td align="center">@item.MarketValue.ToString(ViewBag.NumFormat)</td>
+                                                <td align="center">@item.Delta1Pct.ToString(ViewBag.NumFormat)</td>
+                                                <td align="center">@item.DeltaDollar.ToString(ViewBag.NumFormat)</td>
+                                                <td align="center">@item.UnrealizedPL.ToString(ViewBag.NumFormat)</td>
+                                                <td align="center">@item.Duration.ToString(ViewBag.NumFormat)</td>
+                                                <td align="center">@item.DailyiPL.ToString(ViewBag.NumFormat)</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                             <div class="panel-body">
                                 <div id="@item.PortfolioType" class="panel-collapse collapse">
                                     <div style="overflow:auto;">
-                                        <table class="display tblStrategy">
+                                        <table class="display tblStrategy tblMainFormat" style="font-size:smaller">
                                             <thead>
                                                 <tr>
                                                     <th>Action</th>
                                                     <th>Ticker</th>
+                                                    <th>Type</th>
                                                     <th>DailyPL</th>
                                                     <th>DailyRtn</th>
-                                                    <th>Type</th>
+                                                    <th>UnPL</th>
+                                                    <th>RlzPL</th>
                                                     <th>Pos</th>
                                                     <th>AveCost</th>
                                                     <th>MktPrice</th>
                                                     <th>CostBasis</th>
                                                     <th>MktValue</th>
+                                                    <th>DollarDelta</th>
+                                                    <th>Weight</th>
                                                     <th>Delta</th>
                                                     <th>Yield</th>
                                                     <th>Duration</th>
+                                                    <th>DV01</th>
                                                     <th>AccruedDvd</th>
-                                                    <th>Exposure</th>
-                                                    <th>UnPL</th>
-                                                    <th>RzPL</th>
 
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 @foreach (IBPortfolioModel pos in ViewBag.portfolioData[item])
                                                 {
-                                                <tr>
-                                                    <td>
-                                                        <button class="btn btn-in-grid-agree btnEditSecurity"
-                                                                data-target="#modalEditSecurity" data-toggle="modal"
-                                                                data-position="@Newtonsoft.Json.JsonConvert.SerializeObject(@pos)">
-                                                            Edit
-                                                        </button>
-                                                    </td>
-                                                    <td>@pos.tickerName</td>
-                                                    <td>@(pos.DailyPNL.ToString(ViewBag.NumFormat))</td>
-                                                    <td>@((pos.DailyPNL / Math.Abs(pos.marketValue)).ToString(ViewBag.PctFormat))</td>
-                                                    <td>@pos.secType</td>
-                                                    <td>@pos.position</td>
-                                                    <td>@(pos.averageCost.ToString(ViewBag.NumFormat1))</td>
-                                                    <td>@(pos.marketPrice.ToString(ViewBag.NumFormat1))</td>
-                                                    <td>@(pos.premium.ToString(ViewBag.NumFormat))</td>
-                                                    <td>@(pos.marketValue.ToString(ViewBag.NumFormat))</td>
-                                                    <td>@(pos.Delta.ToString(ViewBag.NumFormat))</td>
-                                                    <td>@(pos.DividendsYield.ToString(ViewBag.PctFormat))</td>
-                                                    <td>@(pos.Duration.ToString(ViewBag.NumFormat))</td>
-                                                    <td>@(pos.DividendsAccrued.ToString(ViewBag.NumFormat))</td>
-                                                    <td>@((pos.longShortRatio * pos.marketValue).ToString(ViewBag.NumFormat))</td>
-                                                    <td>@(pos.unrealizedPNL.ToString(ViewBag.NumFormat))</td>
-                                                    <td>@(pos.realizedPNL.ToString(ViewBag.NumFormat))</td>
+                                                    <tr>
+                                                        <td>
+                                                            <button class="btn btn-in-grid-agree btnEditSecurity"
+                                                                    data-target="#modalEditSecurity" data-toggle="modal"
+                                                                    data-position="@Newtonsoft.Json.JsonConvert.SerializeObject(@pos)">
+                                                                Detals
+                                                            </button>
+                                                        </td>
+                                                        <td>@pos.tickerName</td>
+                                                        <td>@pos.secType</td>
+                                                        <td>@(pos.DailyPNL.ToString(ViewBag.NumFormat))</td>
+                                                        <td>@((pos.DailyPNL / Math.Abs(pos.marketValue)).ToString(ViewBag.PctFormat))</td>
+                                                        <td>@(pos.unrealizedPNL.ToString(ViewBag.NumFormat))</td>
+                                                        <td>@(pos.realizedPNL.ToString(ViewBag.NumFormat))</td>
+                                                        <td>@pos.position</td>
+                                                        <td>@(pos.averageCost.ToString(ViewBag.NumFormat1))</td>
+                                                        <td>@(pos.marketPrice.ToString(ViewBag.NumFormat1))</td>
+                                                        <td>@(pos.premium.ToString(ViewBag.NumFormat))</td>
+                                                        <td>@(pos.marketValue.ToString(ViewBag.NumFormat))</td>
+                                                        <td>@(pos.DeltaDollar.ToString(ViewBag.NumFormat))</td>
+                                                        <td>@((pos.DeltaDollar / item.DeltaDollar).ToString(ViewBag.PctFormat))</td>
+                                                        <td>@(pos.Delta1Pct.ToString(ViewBag.NumFormat))</td>
+                                                        <td>@(pos.DividendsYield.ToString(ViewBag.PctFormat))</td>
+                                                        <td>@(pos.Duration.ToString(ViewBag.NumFormat))</td>
+                                                        <td>@(pos.DV01.ToString(ViewBag.NumFormat))</td>
+                                                        <td>@(pos.DividendsAccrued.ToString(ViewBag.NumFormat))</td>
 
 
-                                                </tr>
+                                                    </tr>
                                                 }
                                             </tbody>
                                         </table>
@@ -150,17 +163,53 @@
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-lg-3">
+                    <div class="col-lg-2">
                         Strategy
+                        <select id="SelectStrategy"></select>
                     </div>
-                    <div class="col-lg-3">
-                        <div>
-                            <select id="SelectStrategy"></select>
-                        </div>
-                    </div>
+                </div>
+                <br />
+                <table id="tblSecurityModal" class="table tblMainFormat table-bordered table-hover" style="font-size:smaller;width:80%">
+                    <caption style="font-size:large;font-weight:600;text-align:left">Security Details</caption>
+                    <thead class="thead-hide">
+                        <tr>
+                            <th>Field</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <br />
+                <div style="overflow:auto;">
+                    <table class="table tblMainFormat table-responsive table-bordered" id="tblOptionTable">
+                        <caption style="font-size:large;font-weight:600;text-align:left">Optionlegs Details</caption>
+                        <thead>
+                            <tr>
+                                <th>Ticker</th>
+                                <th>DailyPL</th>
+                                <th>Underlying</th>
+                                <th>S0</th>
+                                <th>Strike</th>
+                                <th>moneyness</th>
+                                <th>delta</th>
+                                <th>Position</th>
+                                <th>Last</th>
+                                <th>Bid</th>
+                                <th>Ask</th>
+                                <th>Premium</th>
+                                <th>MarketValue</th>
+                                <th>UnPL</th>
+                                <th>$Delta</th>
+                                <th>$Gamma</th>
+                                <th>ImpVol</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
             <div class="modal-footer">
+                <button class="btn btn-action-main pull-left" id="refreshModal">Refresh</button>
                 <button type="button" class="btn btn-disagree" data-dismiss="modal">Close</button>
                 <button type="button" id="btnSaveEditModal" class="btn btn-action-main">Save changes</button>
             </div>

@@ -12,42 +12,44 @@
 else
 {
     <button id="btnDisConnection" class="btn btn-disagree  btn-block">Disconnect</button>
-        <div class=" row">
-            <table class="display table table-responsive table-bordered table-striped" style="font-size:small; font-weight:600 ;table-layout:fixed">
-                <caption style="font-size:large;font-weight:600;text-align:center">Market Summary</caption>
-                <thead>
-                    <tr>
-                        @foreach (MatlabContractModel mktitem in ViewBag.MktSummaryData)
+    <div class=" row">
+        <table class="display table table-responsive table-striped" style="font-size:small; font-weight:600 ;table-layout:fixed">
+            <caption style="font-size:large;font-weight:600;text-align:center">Market Summary</caption>
+            <thead>
+                <tr>
+                    @foreach (MktData mktitem in ViewBag.MktSummaryData)
+                    {
+                        <th style="text-align:center">@mktitem.contract.Symbol</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    @foreach (MktData mktitem in ViewBag.MktSummaryData)
+                    {
+                        <td align="center">@Math.Round(mktitem.last, 2)</td>
+                    }
+                </tr>
+                <tr>
+                    @foreach (MktData mktitem in ViewBag.MktSummaryData)
+                    {
+                        if (mktitem.last / mktitem.close < 1)
                         {
-                            <th style="text-align:center">@mktitem.contract.Symbol</th>
+                            <td align="center" style="color:darkred">@((mktitem.last / mktitem.close - 1).ToString(ViewBag.PctFormat))</td>
                         }
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        @foreach (MatlabContractModel mktitem in ViewBag.MktSummaryData)
+                        else
                         {
-                            <td align="center">@Math.Round(mktitem.last, 2)</td>
-                        }
-                    </tr>
-                    <tr>
-                        @foreach (MatlabContractModel mktitem in ViewBag.MktSummaryData)
-                        {
-                            if (mktitem.last / mktitem.close < 1)
-                            {
-                                <td align="center" style="color:darkred">@((mktitem.last / mktitem.close - 1).ToString(ViewBag.PctFormat))</td>
-                            }
-                            else
-                            {
-                                <td align="center" style="color:lightseagreen">@((mktitem.last / mktitem.close - 1).ToString(ViewBag.PctFormat))</td>
+                            <td align="center" style="color:lightseagreen">@((mktitem.last / mktitem.close - 1).ToString(ViewBag.PctFormat))</td>
 
-                            }
                         }
-                </tbody>
-            </table>
-        </div>
-        <div class="row">
-            <table class="display table table-responsive table-striped" style="font-size:small; font-weight:600 ;table-layout:fixed">
+                    }
+            </tbody>
+        </table>
+    </div>
+    <div class="row">
+        <div style="overflow:auto;">
+
+            <table id="tblSummary" class="table  table-responsive" style="font-size:small; font-weight:600">
                 <caption style="font-size:large;font-weight:600;text-align:center">Account Snapshot</caption>
                 <thead style="color:#746232;font-weight:100">
                     <tr>
@@ -67,62 +69,70 @@ else
                 </tbody>
             </table>
         </div>
-    <div style="overflow:auto;">
-        @*<ul class="nav nav-tabs">
-                <li role="presentation" class=""><a href="#StrategySummary">StrategySummary</a></li>
-                <li role="presentation" class=""><a href="#StrategySummary">SecuritySummary</a></li>
-            </ul>*@
-        <br />
-        @*<div class="tab-content">
-            <div class="tab-pane fade in" id="StrategySummary">*@
-        <table class="display table-hover table table-bordered tblMainFormat table-striped table-hover" id="tblStrategySummary">
-            <caption style="font-size:large;font-weight:600;text-align:center">Strategy Snapshot</caption>
-            <thead>
-                <tr>
-                    <th>Strategy</th>
-                    <th>DailyPL</th>
-                    <th>DailyRtn</th>
-                    <th>Cost</th>
-                    <th>MV</th>
-                    <th>MV(ls)</th>
-                    <th>Delta</th>
-                    <th>Gamma</th>
-                    <th>Vega</th>
-                    <th>Theta</th>
-                    <th>Duration</th>
-                    <th>DvdYield</th>
-                    <th>DvdAcrud</th>
-                    <th>DvdAnnEst</th>
-                    <th>UnrlzPL</th>
+    </div>
+    <br />
+    <div style="font-size:large;font-weight:600;text-align:center;font-family:'Yu Gothic UI'">Strategy Snapshot</div>
+    <table class="table-striped tblMainFormat table-hover row-border order-column" style="font-size:smaller" id="tblStrategySummary">
+        <thead>
+            <tr>
+                <th>Strategy</th>
+                <th>DailyPL</th>
+                <th>DailyRtn</th>
+                <th>UnrlzPL</th>
+                <th>RlzPL</th>
+                <th>MV</th>
+                <th>MV%</th>
+                <th>DollarDelta</th>
+                <th>Duration</th>
+                <th>DV01</th>
+                <th>1%Delta</th>
+                <th>1%Gamma</th>
+                <th>Vega</th>
+                <th>Theta</th>
+                <th>DvdYield</th>
+                <th>DvdAcrud</th>
+                <th>DvdAnnEst</th>
 
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (PerformanceSummary item in ViewBag.portfolioStrategy.Keys)
-                {
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (PerformanceSummary item in ViewBag.portfolioStrategy.Keys)
+            {
                 <tr>
-                    <td>@item.PortfolioType</td>
-                    <td>@item.DailyiPL.ToString(ViewBag.NumFormat)</td>
+                    <td style="color:#040101;font-weight:600">@item.PortfolioType</td>
+                    @if (item.DailyiPL >= 0)
+                    {
+                        <td style="color:lightseagreen;font-weight:500">@item.DailyiPL.ToString(ViewBag.NumFormat)</td>
+                    }
+                    else
+                    {
+                        <td style="color:darkred;font-weight:500">@item.DailyiPL.ToString(ViewBag.NumFormat)</td>
+                    }
                     <td>@((item.DailyiPL / Math.Abs(item.MarketValue)).ToString(ViewBag.PctFormat))</td>
-                    <td>@item.Premium.ToString(ViewBag.NumFormat)</td>
+                    @if (item.UnrealizedPL >= 0)
+                    {
+                        <td style="color:lightseagreen;font-weight:400">@item.UnrealizedPL.ToString(ViewBag.NumFormat)</td>
+                    }
+                    else
+                    {
+                        <td style="color:darkred;font-weight:400">@item.UnrealizedPL.ToString(ViewBag.NumFormat)</td>
+                    }
+                    <td>@item.RealizedPL.ToString(ViewBag.NumFormat)</td>
                     <td>@item.MarketValue.ToString(ViewBag.NumFormat)</td>
-                    <td>@item.Exposure.ToString(ViewBag.NumFormat)</td>
-                    <td>@item.Delta.ToString(ViewBag.NumFormat)</td>
+                    <td>@item.MarketValuePct.ToString(ViewBag.PctFormat)</td>
+                    <td>@item.DeltaDollar.ToString(ViewBag.NumFormat)</td>
+                    <td>@item.Duration.ToString(ViewBag.NumFormat)</td>
+                    <td>@item.DV01.ToString(ViewBag.NumFormat)</td>
+                    <td>@item.Delta1Pct.ToString(ViewBag.NumFormat)</td>
                     <td>@item.Gamma.ToString(ViewBag.NumFormat)</td>
                     <td>@item.Vega.ToString(ViewBag.NumFormat)</td>
                     <td>@item.Theta.ToString(ViewBag.NumFormat)</td>
-                    <td>@item.Duration.ToString(ViewBag.NumFormat)</td>
                     <td>@item.Yield.ToString(ViewBag.PctFormat)</td>
                     <td>@item.AccruedDvd.ToString(ViewBag.NumFormat)</td>
                     <td>@item.AnnDvd.ToString(ViewBag.NumFormat)</td>
-                    <td>@item.UnrealizedPL.ToString(ViewBag.NumFormat)</td>
 
                 </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-    @*</div>
-        </div>*@
-
+            }
+        </tbody>
+    </table>
 }

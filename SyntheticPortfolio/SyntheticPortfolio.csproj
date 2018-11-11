@@ -148,7 +148,6 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\CheckAuthorization.cs" />
-    <Compile Include="Models\DataServiceAPI.cs" />
     <Compile Include="Models\IBStrategy.cs" />
     <Compile Include="Models\IBstrategyMapping.cs" />
     <Compile Include="Models\LoginMV.cs" />
@@ -197,7 +196,9 @@
     <Content Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
-    <Content Include="Views\Web.config" />
+    <Content Include="Views\Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
